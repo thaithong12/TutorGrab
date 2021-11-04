@@ -25,6 +25,8 @@ public class GroupEntity extends BaseEntity {
     @Column(name = "assginment_id")
     private Long assignmentId;
 
+    private String name;
+
     /**
      * administratorId
      */
