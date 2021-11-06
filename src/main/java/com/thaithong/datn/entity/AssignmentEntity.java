@@ -16,8 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -40,8 +39,8 @@ public class AssignmentEntity extends BaseEntity {
     @Column(name = "is_published")
     private Boolean isPublished;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "assignment")
-    private Set<UserAssignment> userAssignments = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "assignment")
+    private List<UserAssignment> userAssignments;
 
     @ManyToOne
     @JoinColumn(name = "subject_id")

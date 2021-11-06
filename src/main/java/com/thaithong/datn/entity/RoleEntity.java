@@ -26,6 +26,6 @@ public class RoleEntity extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private AccountRole role = AccountRole.ROLE_USER;
 
-    @ManyToMany(mappedBy = "accountRoles", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "accountRoles", cascade = CascadeType.ALL)
     private Set<UserEntity> accounts = new HashSet<>();
 }

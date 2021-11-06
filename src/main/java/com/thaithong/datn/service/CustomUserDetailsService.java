@@ -25,12 +25,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity user = userService.findByEmail(email);
-        if (user == null) {
-            throw new UsernameNotFoundException(email);
-        }
-        if (!user.getIsActivated()) {
-            throw new DisabledException("Account is not activated");
-        }
         Set<GrantedAuthority> authorities = new HashSet<>();
         user.getAccountRoles().forEach(p -> authorities.add(new SimpleGrantedAuthority(p.getRole().toString())));
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);

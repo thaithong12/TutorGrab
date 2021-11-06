@@ -6,6 +6,9 @@ import com.thaithong.datn.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
+
 @Service
 public class RoleService {
     @Autowired
@@ -13,5 +16,9 @@ public class RoleService {
 
     public RoleEntity getRole(AccountRole role) {
         return roleRepository.findByRole(role);
+    }
+
+    public List<RoleEntity> getRoles() {
+        return (List<RoleEntity>) roleRepository.findAll();
     }
 }

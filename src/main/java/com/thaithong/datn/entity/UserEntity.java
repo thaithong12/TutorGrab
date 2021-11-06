@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -18,9 +16,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true, exclude = "users")
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
@@ -63,19 +60,18 @@ public class UserEntity extends BaseEntity {
     @Column(name = "token_expdate")
     private Date tokenExpDate;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-    @JoinTable(name = "acc_role_relationship",
-            joinColumns = @JoinColumn(name = "acc_id"),
-            inverseJoinColumns = @JoinColumn(name = "acc_role_id"))
-    private Set<RoleEntity> accountRoles;
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "user_role_relationship",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private List<RoleEntity> accountRoles;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "user_group",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "group_id"))
-    private Set<GroupEntity> groups;
+    private List<GroupEntity> groups;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<UserAssignment> userAssignments;
-
 }

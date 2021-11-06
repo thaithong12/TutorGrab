@@ -20,16 +20,22 @@ public class UserMapper {
     @Autowired
     private GroupMapper groupMapper;
 
+    @Autowired
+    private RoleService roleService;
+
     public UserResponseModel toUserResponseModel(UserEntity userEntity) {
         // Init
-        UserResponseModel userDTO = new UserResponseModel();
-        List<GroupResponseModel> groupEntitySet = new ArrayList<>();
+        var userDTO = new UserResponseModel();
+        var groupEntitySet = new ArrayList<GroupResponseModel>();
+
+//        var roles = roleService.getRoles();
 
         // Main user infos
         userDTO.setId(userEntity.getId());
         userDTO.setName(userEntity.getName());
         userDTO.setEmail(userEntity.getEmail());
-//        userDTO.setWsToken(userEntity.getWsToken());
+
+        // userDTO.setWsToken(userEntity.getWsToken());
         // Global role
         userDTO.setRoles(userEntity.getAccountRoles().stream().map(item -> item.getRole().toString()).collect(Collectors.toList()));
         // Spring security mapping

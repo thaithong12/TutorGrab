@@ -12,8 +12,7 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -32,9 +31,9 @@ public class GroupEntity extends BaseEntity {
      */
     private Long userId;
 
-    @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<UserEntity> users = new HashSet<>();
+    @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
+    private List<UserEntity> users;
 
-    @OneToMany(mappedBy = "group", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<MessageEntity> messages = new HashSet<>();
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    private List<MessageEntity> messages;
 }

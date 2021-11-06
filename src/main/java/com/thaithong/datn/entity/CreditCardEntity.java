@@ -15,8 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -37,6 +36,6 @@ public class CreditCardEntity extends BaseEntity {
 
     private Double balance;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "creditCard")
-    private Set<PaymentEntity> payments = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "creditCard")
+    private List<PaymentEntity> payments;
 }

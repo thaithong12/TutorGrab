@@ -11,6 +11,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
@@ -22,6 +23,6 @@ import java.util.Set;
 public class SubjectEntity extends BaseEntity {
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "subject")
-    private Set<AssignmentEntity> assignments = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "subject")
+    private List<AssignmentEntity> assignments;
 }

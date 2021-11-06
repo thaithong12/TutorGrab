@@ -1,5 +1,6 @@
 package com.thaithong.datn.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,7 @@ public class UserResponseModel {
 
     private List<GroupResponseModel> groupList;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date expiration_date;
 
     private String email;
