@@ -39,4 +39,7 @@ public class GroupEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<MessageEntity> messages;
+
+    @Column(name = "is_closed")
+    private Boolean isClosed;
 }

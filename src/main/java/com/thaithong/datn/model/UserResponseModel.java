@@ -27,6 +27,8 @@ public class UserResponseModel {
 
     private String wsToken;
 
+    private String avatar;
+
     private List<GroupResponseModel> groupList;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

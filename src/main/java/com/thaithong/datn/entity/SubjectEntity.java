@@ -1,5 +1,6 @@
 package com.thaithong.datn.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,6 +25,7 @@ import java.util.List;
 @Getter
 @Setter
 public class SubjectEntity extends BaseEntity {
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String name;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY)

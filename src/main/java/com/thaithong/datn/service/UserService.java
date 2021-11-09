@@ -1,9 +1,12 @@
 package com.thaithong.datn.service;
 
 import com.thaithong.datn.entity.UserEntity;
+import com.thaithong.datn.model.UserResponseModel;
 import com.thaithong.datn.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -20,5 +23,21 @@ public class UserService {
 
     public UserEntity findByToken (String token) {
         return userRepository.findByToken(token);
+    }
+
+    public List<UserResponseModel> getAllUsers() {
+        return null;
+    }
+
+    public List<UserResponseModel> findByIsBlocked(Boolean isBlocked){
+        return null;
+    }
+
+    private UserResponseModel convertEntityToResponseModel ( ){
+        return null;
+    }
+
+    private void updateUserInfo () {
+
     }
 }

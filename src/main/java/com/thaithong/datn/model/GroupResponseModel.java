@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -13,7 +15,18 @@ import lombok.Setter;
 public class GroupResponseModel {
     private Long id;
 
-    private String url;
-
     private String name;
+
+    private List<UserResponseModel> users;
+
+    /**
+     * administratorId
+     */
+    private Long userId;
+
+    private AssignmentResponseModel assignment;
+
+    private List<MessageResponseModel> messages;
+
+    private Boolean isClosed;
 }
