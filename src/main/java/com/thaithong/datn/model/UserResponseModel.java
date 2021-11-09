@@ -23,6 +23,8 @@ public class UserResponseModel {
 
     private String password;
 
+    private String phoneNumber;
+
     private String jwt;
 
     private String wsToken;
@@ -36,7 +38,11 @@ public class UserResponseModel {
 
     private String email;
 
-    private boolean isActivated;
+    private Boolean isActivated;
+
+    private Boolean isAuthorized;
+
+    private Boolean isBlocked;
 
     private List<String> roles;
 

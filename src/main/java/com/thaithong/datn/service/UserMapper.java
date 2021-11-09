@@ -39,7 +39,7 @@ public class UserMapper {
         // Global role
         userDTO.setRoles(userEntity.getAccountRoles().stream().map(item -> item.getRole().toString()).collect(Collectors.toList()));
         // Spring security mapping
-        userDTO.setActivated(userEntity.getIsActivated());
+        userDTO.setIsActivated(userEntity.getIsActivated());
         userDTO.setJwt(userEntity.getJwt());
         userEntity.getGroups().forEach(groupEntity ->
                 groupEntitySet.add(groupMapper.toGroupResponseModel(groupEntity, userEntity.getId())));

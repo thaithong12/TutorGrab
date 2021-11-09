@@ -26,13 +26,12 @@ public class AssignmentController {
 
     @GetMapping("/assignments")
     public ResponseEntity<?> getAllAssignment() {
-        return ResponseEntity.status(HttpStatus.OK).body(assignmentService.getAllAssignments());
+        return ResponseEntity.ok(assignmentService.getAllAssignments());
     }
 
     @GetMapping("/assignments/user/{id}/{who}")
     public ResponseEntity<?> getAllAssignmentOfUser(@PathVariable Long id, @PathVariable String who) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(assignmentService.getAssignmentByAnsweredIdOrPutterId(id, who));
+        return ResponseEntity.ok(assignmentService.getAssignmentByAnsweredIdOrPutterId(id, who));
     }
 
     @GetMapping("/assignments/{id}")
@@ -40,16 +39,16 @@ public class AssignmentController {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(assignmentService.getAssignment(id));
         } catch (CustomErrorException customErrorException) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(customErrorException.getData());
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
         }
     }
 
     @PutMapping("/assignments/{id}")
     private ResponseEntity<?> updateAssignment(@PathVariable Long id, @RequestBody AssignmentRequestModel requestModel) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(assignmentService.updateAssignment(id, requestModel));
+            return ResponseEntity.ok(assignmentService.updateAssignment(id, requestModel));
         } catch (CustomErrorException customErrorException) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(customErrorException.getData());
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
         }
     }
 
@@ -59,7 +58,7 @@ public class AssignmentController {
             assignmentService.createAssignment(requestModel);
             return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (CustomErrorException customErrorException) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(customErrorException.getData());
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
         }
     }
 
@@ -69,7 +68,7 @@ public class AssignmentController {
             assignmentService.deleteAssignment(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
         } catch (CustomErrorException customErrorException) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(customErrorException.getData());
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
         }
     }
 }
