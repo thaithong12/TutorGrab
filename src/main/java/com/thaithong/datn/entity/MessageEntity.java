@@ -4,7 +4,9 @@ import com.thaithong.datn.enums.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,7 +21,8 @@ import javax.persistence.Table;
 @Table(name = "messages")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Setter
+@Getter
 public class MessageEntity extends BaseEntity {
     @Column(name = "sender_id")
     private Long senderId;

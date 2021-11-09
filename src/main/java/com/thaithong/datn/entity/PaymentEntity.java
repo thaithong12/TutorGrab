@@ -4,7 +4,9 @@ import com.thaithong.datn.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,7 +21,8 @@ import javax.persistence.Table;
 @Table(name = "payments")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class PaymentEntity extends BaseEntity {
     @Column(name = "recipient_id")
     private Long recipientId;

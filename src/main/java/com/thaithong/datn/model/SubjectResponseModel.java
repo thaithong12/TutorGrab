@@ -6,14 +6,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
+import java.util.Date;
+
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupResponseModel {
+public class SubjectResponseModel {
     private Long id;
 
-    private String url;
+    private Date createdAt;
+
+    private Date updatedAt;
+
+    private Long createdBy;
+
+    private Long updatedBy;
 
     private String name;
 }

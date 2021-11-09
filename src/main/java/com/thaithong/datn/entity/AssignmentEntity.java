@@ -4,7 +4,9 @@ import com.thaithong.datn.enums.DifficultType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -23,7 +25,8 @@ import java.util.List;
 @Table(name = "assignments")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class AssignmentEntity extends BaseEntity {
     private String title;
 
@@ -38,6 +41,9 @@ public class AssignmentEntity extends BaseEntity {
 
     @Column(name = "is_published")
     private Boolean isPublished;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assignment")
     private List<UserAssignment> userAssignments;

@@ -3,7 +3,9 @@ package com.thaithong.datn.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.CascadeType;
@@ -22,7 +24,8 @@ import java.util.List;
 @Table(name = "creadit_cards")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Setter
+@Getter
 public class CreditCardEntity extends BaseEntity {
     private String name;
 

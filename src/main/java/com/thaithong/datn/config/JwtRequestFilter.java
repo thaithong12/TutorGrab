@@ -1,5 +1,6 @@
 package com.thaithong.datn.config;
 
+import com.thaithong.datn.model.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,13 +16,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -33,22 +32,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         final String authorizationHeader = request.getHeader("Authorization");
 
-//        AccountPrincipal user = null;
-//        TokenEntity token = null;
-//        if (StringUtils.hasText(authorizationHeader) && authorizationHeader.startsWith("Token ")) {
-//            String jwt = authorizationHeader.substring(6);
-//            user = jwtUtil.getUserFromToken(jwt);
+        UserModel user = null;
+//        String token = null;
+        if (StringUtils.hasText(authorizationHeader) && authorizationHeader.startsWith("Token ")) {
+            String jwt = authorizationHeader.substring(6);
+            user = jwtUtil.getUserFromToken(jwt);
 //            token = verificationTokenService.findByToken(jwt);
-//        }
-//
-//        if (null != user && null != token && token.getTokenExpDate().after(new Date())) {
-//            Set<GrantedAuthority> authorities = new HashSet<>();
-//            user.getAuthorities().forEach(p -> authorities.add(new SimpleGrantedAuthority((String) p)));
-//            UsernamePasswordAuthenticationToken authentication =
-//                    new UsernamePasswordAuthenticationToken(user, null, authorities);
-//            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
-//        }
+        }
+
+        if (null != user) {
+            Set<GrantedAuthority> authorities = new HashSet<>();
+            user.getAuthorities().forEach(p -> authorities.add(new SimpleGrantedAuthority(p.toString())));
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(user, null, authorities);
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
 
         chain.doFilter(request, response);
     }

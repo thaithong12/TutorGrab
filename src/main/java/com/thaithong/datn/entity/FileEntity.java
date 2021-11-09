@@ -3,7 +3,9 @@ package com.thaithong.datn.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,7 +16,8 @@ import javax.persistence.Table;
 @Table(name = "files")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class FileEntity extends BaseEntity {
     @Column(name = "message_id")
     private Long messageId;

@@ -1,43 +1,50 @@
-package com.thaithong.datn.entity;
+package com.thaithong.datn.model;
 
+import com.thaithong.datn.enums.DifficultType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.EntityListeners;
+import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import java.io.Serializable;
 import java.util.Date;
 
-@MappedSuperclass
 @Getter
 @Setter
-@EntityListeners(AuditingEntityListener.class)
-public abstract class BaseEntity implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@AllArgsConstructor
+@NoArgsConstructor
+public class AssignmentResponseModel {
     private Long id;
 
-    @CreatedDate
     private Date createdAt;
 
-    @LastModifiedDate
     private Date updatedAt;
 
-    @LastModifiedBy
     private Long createdBy;
 
-    @CreatedBy
     private Long updatedBy;
+
+    private String title;
+
+    private String content;
+
+    private DifficultType difficultType;
+
+    private Boolean isAnswered;
+
+    private Boolean isPublished;
+
+    private Boolean isDeleted;
+
+    private SubjectResponseModel subject;
 }
