@@ -1,18 +1,18 @@
-import logo from './logo.svg';
 import './App.css';
-import { Route, Router } from "react-router-dom";
-import { history } from './Helpers/history';
+import {Router} from "react-router-dom";
+import {history} from './Helper/history';
 import React from "react";
-import HeaderPage from "./Components/Header";
+import HomeDefault from "./Components/Users/Home/HomeDefault";
+import AuthHome from "./Components/Users/Auth/AuthHome";
 
 function App() {
     return (
-        <div className = "App" >
-        <Router history = { history } > {
-            // <Route path="/" component={HeaderPage} />
-        }
-        </Router>
-    </div >
+        <div className="App">
+            <Router history={history}>
+                <HomeDefault/>
+                <AuthHome/>
+            </Router>
+        </div>
     );
 }
 
