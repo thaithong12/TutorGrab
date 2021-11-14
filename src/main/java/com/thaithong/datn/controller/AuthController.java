@@ -1,7 +1,6 @@
 package com.thaithong.datn.controller;
 
 import com.thaithong.datn.model.JwtRequestModel;
-import com.thaithong.datn.model.UserResponseModel;
 import com.thaithong.datn.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping(value = "/api/auth")
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     @Autowired
