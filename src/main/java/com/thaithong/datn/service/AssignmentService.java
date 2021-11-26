@@ -179,4 +179,15 @@ public class AssignmentService {
         }
         return ass;
     }
+
+    public List<AssignmentResponseModel> getAllPublishedAssignment () {
+        var data = assignmentRepository.findByIsAnsweredAndIsPublishedAndIsDeleted(true, true, false);
+        var listReturn = new ArrayList<AssignmentResponseModel>();
+        if (!CollectionUtils.isEmpty(data)) {
+            data.forEach(item -> {
+                listReturn.add(convertEntityToResponseModel(item));
+            });
+        }
+        return listReturn;
+    }
 }
