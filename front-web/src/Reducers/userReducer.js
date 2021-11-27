@@ -10,9 +10,6 @@ export default function userReducer(state = initialState, action) {
             return {};
         case LOGIN_ACCOUNT: {
             let  newState = {...state, user: action.user, loggedIn: true}
-            // if (action.user.authorization.includes("ROLE_ADMIN")){
-            //     newState.isAdmin = true;
-            // } else newState.isAdmin = false;
             return newState;
         }
         case END_POINT_REGISTER: {

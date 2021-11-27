@@ -1,7 +1,31 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
+import {useSelector} from "react-redux";
+import {useLocation} from "react-router";
 
 export default function Header() {
+    const [curUrl , setCurUrl] = useState({url: '/home'});
+    useEffect(() => {
+        setCurUrl({...curUrl,url: window.location.href});
+    }, []);
+
+    let user = useSelector(state => state.user.user);
+
+    //
+    let [curUser, setUser] = useState({loggedIn: false});
+
+    useEffect(() => {
+        setUser({...user})
+    }, [user]);
+
+    if (curUser.loggedIn) {
+        if (curUser && !curUser.loggedIn) {
+            setUser({...user, loggedIn: false})
+            window.location.reload();
+        }
+    }
+
+    //console.log(curUser);
     return (
         <div>
             <div className="site-mobile-menu site-navbar-target">
@@ -27,22 +51,32 @@ export default function Header() {
                                 className="icon-menu h3 text-black"></span></a></span>
                             <nav className="site-navigation text-right ml-auto d-none d-lg-block" role="navigation">
                                 <ul className="site-menu main-menu js-clone-nav ml-auto ">
-                                    <li className="active">
-                                        <Link to='/'>Home</Link></li>
-                                    <li>
+                                    <li className={curUrl.url.includes('/home') || curUrl.url == 'http://localhost:3000/' ? "active": ""}>
+                                        <Link to='/'>Home</Link>
+                                    </li>
+                                    <li className={curUrl.url.includes('/tutorials') ? "active": ""}>
                                         <Link to='/tutorials' className="nav-link">Tutorials</Link>
                                     </li>
-                                    <li><a href="/sign-in"
-                                           tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html"
-                                           className="nav-link">SignIn</a></li>
-                                    <li><a href="/blogs" tppabs="https://preview.colorlib.com/theme/tutor/blog.html"
-                                           className="nav-link">Blog</a></li>
-                                    <li><a href="/about-us"
+                                    <li className={curUrl.url.includes('/blogs') ? "active": ""}>
+                                        <Link to="/blogs" tppabs="https://preview.colorlib.com/theme/tutor/blog.html"
+                                           className="nav-link">Blog</Link></li>
+                                    <li className={curUrl.url.includes('/about-us') ? "active": ""}>
+                                        <Link to="/about-us"
                                            tppabs="https://preview.colorlib.com/theme/tutor/about.html"
-                                           className="nav-link">About</a></li>
-                                    <li><a href="/contact"
+                                           className="nav-link">About</Link></li>
+                                    <li className={curUrl.url.includes('/contact') ? "active": ""}>
+                                        <Link to="/contact"
                                            tppabs="https://preview.colorlib.com/theme/tutor/contact.html"
-                                           className="nav-link">Contact</a></li>
+                                           className="nav-link">Contact</Link></li>
+                                    <li>
+                                    {
+                                        user && user.loggedIn ?
+                                            <Link className="nav-link"
+                                                  tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html">Hello {user.email}</Link> :
+                                            <Link to="/sign-in" tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html"
+                                                  className="nav-link">SignIn</Link>
+                                    }
+                                    </li>
                                 </ul>
                             </nav>
                         </div>

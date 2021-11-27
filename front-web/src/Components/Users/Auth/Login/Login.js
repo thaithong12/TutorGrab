@@ -1,12 +1,11 @@
-import React, {useEffect, useRef, useState} from 'react'
-import {Link, useHistory} from "react-router-dom";
+import React, {useEffect} from 'react'
+import {Link} from "react-router-dom";
 import ScriptTag from "react-script-tag";
 import {Helmet} from "react-helmet";
 import TextField from "@material-ui/core/TextField";
 import {useDispatch, useSelector} from "react-redux";
 import {login} from "../../../../Actions/authAction";
 import {history} from "../../../../Helper/history";
-import { Redirect } from 'react-router-dom';
 
 export default function Login() {
     const dispatch = useDispatch();
@@ -20,24 +19,21 @@ export default function Login() {
         setValues({...values, [event.target.name]: event.target.value});
     };
 
-    let [curUser, setUser] = useState({});
-    let user = useSelector(state => state.user);
+    let user = useSelector(state => state.user.user);
 
-    console.log(user)
+    console.log(user);
+
     useEffect(() => {
-        setUser(user);
-    },[user]);
-
-    console.log(user.user && user.user.email)
-    if (user.user && user.user.name) {
-        console.log('vao day')
-        // history.push("/");
-        // return <Redirect to='/about-us' />
-    }
+        if (user && user.loggedIn) {
+            history.push({
+                pathname: '/',
+                state: {...user}
+            })
+        }
+    }, [user]);
 
     function handleSubmitLogin(e) {
         e.preventDefault();
-        console.log(values);
         dispatch(login(values));
     }
 

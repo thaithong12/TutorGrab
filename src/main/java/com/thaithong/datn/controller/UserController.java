@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -42,7 +44,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    private ResponseEntity<?> updateUserInfo(@PathVariable Long id,@RequestBody UserRequestModel requestModel) {
+    private ResponseEntity<?> updateUserInfo(@PathVariable Long id, @RequestBody UserRequestModel requestModel) {
         try {
             userService.updateUserInfo(id, requestModel);
             return ResponseEntity.ok(userService.getUserInfo(id));
@@ -52,7 +54,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}/admin")
-    private ResponseEntity<?> updateUserInfoByAdmin(@PathVariable Long id,@RequestBody UserRequestModel requestModel) {
+    private ResponseEntity<?> updateUserInfoByAdmin(@PathVariable Long id, @RequestBody UserRequestModel requestModel) {
         try {
             userService.updateUserRoleByAdmin(id, requestModel);
             return ResponseEntity.ok(userService.getUserInfo(id));
@@ -69,5 +71,15 @@ public class UserController {
         } catch (CustomErrorException customErrorException) {
             return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
         }
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadFiles(@RequestBody MultipartFile[] multipartFile) {
+        return userService.processingImage(multipartFile);
+    }
+
+    @GetMapping(value = "/top-users")
+    public ResponseEntity<?> getTopUser() {
+        return userService.getTopUser();
     }
 }

@@ -1,21 +1,31 @@
 package com.thaithong.datn.service;
 
 import com.thaithong.datn.entity.RoleEntity;
+import com.thaithong.datn.entity.UserAssignment;
 import com.thaithong.datn.entity.UserEntity;
 import com.thaithong.datn.enums.AccountRole;
+import com.thaithong.datn.model.UserAssignmentResponseModel;
 import com.thaithong.datn.model.UserRequestModel;
 import com.thaithong.datn.model.UserResponseModel;
+import com.thaithong.datn.repository.UserAssignmentRepository;
 import com.thaithong.datn.repository.UserRepository;
 import com.thaithong.datn.utils.CustomErrorException;
 import com.thaithong.datn.utils.ErrorObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -28,6 +38,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserAssignmentRepository userAssignmentRepository;
 
     public void saveUser(UserEntity u) {
         userRepository.save(u);
@@ -122,5 +135,88 @@ public class UserService {
         roles.forEach(role -> rolesResponse.add(role.getRole().name()));
         userResponse.setRoles(rolesResponse);
         return userResponse;
+    }
+
+    public ResponseEntity<?> processingImage(MultipartFile[] multipartFile) {
+        var uploadRootPath = "D:\\Projects\\datn\\datn\\front-web\\public\\image";
+
+        System.out.println("uploadRootPath=" + uploadRootPath);
+
+        var uploadRootDir = new File(uploadRootPath);
+        // Create Folder If not exist
+        if (!uploadRootDir.exists()) {
+            uploadRootDir.mkdirs();
+        }
+
+        MultipartFile[] fileDatas = multipartFile;
+
+        var uploadedFiles = new ArrayList<File>();
+        var failedFiles = new ArrayList<String>();
+        var fileNames = new ArrayList<String>();
+        for (MultipartFile fileData : fileDatas) {
+
+            // format name file
+            var date = new Date();
+            var dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            // File Name in client
+            var name = dateFormat.format(date) + fileData.getOriginalFilename();
+            System.out.println("Client File Name = " + name);
+
+            if (name.length() > 0) {
+                try {
+                    // File Name in Server
+                    var serverFile = new File(uploadRootDir.getAbsolutePath() + File.separator + name);
+
+                    var stream = new BufferedOutputStream(new FileOutputStream(serverFile));
+                    stream.write(fileData.getBytes());
+                    stream.close();
+
+                    uploadedFiles.add(serverFile);
+                    fileNames.add(name);
+                    System.out.println("Write file: " + serverFile);
+                } catch (Exception e) {
+                    System.out.println("Error Write file: " + name);
+                    failedFiles.add(name);
+                }
+            }
+        }
+        if (failedFiles.size() > 0) {
+            return new ResponseEntity<>(HttpStatus.PAYLOAD_TOO_LARGE);
+        }
+        return ResponseEntity.ok(fileNames);
+    }
+
+    public ResponseEntity<?> getTopUser() {
+        var userAsss = userAssignmentRepository.findTopUser();
+        var listReturn = new ArrayList<UserAssignmentResponseModel>();
+        if (!CollectionUtils.isEmpty(userAsss)) {
+            userAsss.forEach(item -> listReturn.add(convertEntityToModel(item)));
+        }
+        return ResponseEntity.ok(listReturn);
+    }
+
+    private UserAssignmentResponseModel convertEntityToModel(UserAssignment e) {
+        var obj = new UserAssignmentResponseModel();
+        obj.setId(e.getId());
+        obj.setCreatedAt(e.getCreatedAt());
+        obj.setCreatedBy(e.getCreatedBy());
+        obj.setIsCompleted(e.getIsCompleted());
+        obj.setIsRejected(e.getIsRejected());
+        obj.setRate(e.getRate());
+        obj.setReason(e.getReason());
+        obj.setRequestId(e.getRequestId());
+        obj.setResponseId(e.getResponseId());
+        obj.setUpdatedAt(e.getUpdatedAt());
+        obj.setUpdatedBy(e.getUpdatedBy());
+        var user = userRepository.findById(e.getResponseId());
+        if (!user.isEmpty()) {
+            var uResponse = new UserResponseModel();
+            uResponse.setId(user.get().getId());
+            uResponse.setEmail(user.get().getEmail());
+            uResponse.setAvatar(user.get().getAvatar());
+            uResponse.setName(user.get().getName());
+            obj.setResponseInfo(uResponse);
+        }
+        return obj;
     }
 }

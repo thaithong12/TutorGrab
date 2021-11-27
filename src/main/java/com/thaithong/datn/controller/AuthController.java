@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping(value = "/api/auth")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin
 public class AuthController {
 
     @Autowired
@@ -27,12 +27,12 @@ public class AuthController {
         return authService.createAuthenticationToken(authenticationRequest, response);
     }
 
-    @PostMapping("/register")
+    @PostMapping(value = "/register")
     public ResponseEntity<?> register(@RequestBody JwtRequestModel user){
         return authService.register(user);
     }
 
-    @GetMapping("/active-account")
+    @GetMapping(value = "/active-account")
     public ResponseEntity<?> activeAccount(@RequestParam String token){
         return authService.activeAccount(token);
     }
