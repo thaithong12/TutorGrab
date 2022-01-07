@@ -44,7 +44,7 @@ public class AssignmentController {
     }
 
     @PutMapping("/assignments/{id}")
-    private ResponseEntity<?> updateAssignment(@PathVariable Long id, @RequestBody AssignmentRequestModel requestModel) {
+    public ResponseEntity<?> updateAssignment(@PathVariable Long id, @RequestBody AssignmentRequestModel requestModel) {
         try {
             return ResponseEntity.ok(assignmentService.updateAssignment(id, requestModel));
         } catch (CustomErrorException customErrorException) {
@@ -53,7 +53,7 @@ public class AssignmentController {
     }
 
     @PostMapping("/assignments")
-    private ResponseEntity<?> createAssigment(@RequestBody AssignmentRequestModel requestModel) {
+    public ResponseEntity<?> createAssigment(@RequestBody AssignmentRequestModel requestModel) {
         try {
             assignmentService.createAssignment(requestModel);
             return ResponseEntity.status(HttpStatus.CREATED).body(null);
@@ -63,10 +63,19 @@ public class AssignmentController {
     }
 
     @DeleteMapping("/assignments/{id}")
-    private ResponseEntity<?> deleteAssignment(@PathVariable Long id) {
+    public ResponseEntity<?> deleteAssignment(@PathVariable Long id) {
         try {
             assignmentService.deleteAssignment(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        } catch (CustomErrorException customErrorException) {
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
+        }
+    }
+
+    @GetMapping("/assignments/published")
+    public ResponseEntity<?> getAllPublishedAssignment () {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(assignmentService.getAllPublishedAssignment());
         } catch (CustomErrorException customErrorException) {
             return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
         }

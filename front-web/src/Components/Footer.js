@@ -1,6 +1,7 @@
 
 
 export default function FooterPage() {
+
     return (
         <footer className="site-footer">
             <div className="container">

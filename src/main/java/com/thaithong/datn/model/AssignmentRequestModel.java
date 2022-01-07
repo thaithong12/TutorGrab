@@ -20,6 +20,10 @@ public class AssignmentRequestModel {
 
     private Long subjectId;
 
+    private String grade;
+
+    private String subjectName;
+
     private Boolean isAnswered;
 
     private Boolean isPublished;

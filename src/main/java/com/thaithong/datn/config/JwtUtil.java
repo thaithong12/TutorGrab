@@ -1,7 +1,11 @@
 package com.thaithong.datn.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.shaded.json.JSONObject;
@@ -10,7 +14,6 @@ import com.nimbusds.jwt.SignedJWT;
 import com.thaithong.datn.model.UserModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
@@ -22,7 +25,7 @@ public class JwtUtil {
     private static final String USER = "user";
     private static final String SECRET = "daycaidaynaychinhlachukycuabandungdelorangoaidaynhenguyhiemchetnguoidayhihihi";
 
-    public String generateToken(UserDetails user) {
+    public String generateToken(UserModel user) {
         String token = null;
         try {
             JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder();

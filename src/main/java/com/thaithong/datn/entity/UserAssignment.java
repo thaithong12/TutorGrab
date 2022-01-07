@@ -1,7 +1,6 @@
 package com.thaithong.datn.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +32,7 @@ public class UserAssignment extends BaseEntity {
     @Column(name = "response_id")
     private Long responseId;
 
-    private Integer rate;
+    private Double rate;
 
     @Column(name = "is_completed")
     private Boolean isCompleted;

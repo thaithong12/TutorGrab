@@ -30,13 +30,17 @@ public class AssignmentResponseModel {
 
     private Date updatedAt;
 
-    private Long createdBy;
+    private String createdBy;
 
-    private Long updatedBy;
+    private String updatedBy;
 
     private String title;
 
     private String content;
+
+    private Double rate;
+
+    private String grade;
 
     private DifficultType difficultType;
 
@@ -44,7 +48,15 @@ public class AssignmentResponseModel {
 
     private Boolean isPublished;
 
+    private Boolean isRejected;
+
     private Boolean isDeleted;
+
+    private String reason;
+
+    private Long requestId;
+
+    private Long responseId;
 
     private SubjectResponseModel subject;
 }

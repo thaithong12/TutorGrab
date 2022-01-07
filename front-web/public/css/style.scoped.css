@@ -313,7 +313,8 @@ figure {
 .form-group {
   position: relative;
   margin-bottom: 25px;
-  overflow: hidden; }
+  /*overflow: hidden; */
+}
   .form-group:last-child {
     margin-bottom: 0px; }
 
@@ -400,7 +401,8 @@ input[type=checkbox]:not(old):checked + label > span:before {
 label {
   position: absolute;
   left: 0;
-  top: 50%;
+  /*top: 50%;*/
+  top: -3%;
   transform: translateY(-50%);
   -moz-transform: translateY(-50%);
   -webkit-transform: translateY(-50%);

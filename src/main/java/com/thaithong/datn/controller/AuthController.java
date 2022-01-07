@@ -1,6 +1,7 @@
 package com.thaithong.datn.controller;
 
 import com.thaithong.datn.model.JwtRequestModel;
+import com.thaithong.datn.model.UserRequestModel;
 import com.thaithong.datn.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping(value = "/api/auth")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin
 public class AuthController {
 
     @Autowired
@@ -27,14 +28,18 @@ public class AuthController {
         return authService.createAuthenticationToken(authenticationRequest, response);
     }
 
-    @PostMapping("/register")
+    @PostMapping(value = "/register")
     public ResponseEntity<?> register(@RequestBody JwtRequestModel user){
         return authService.register(user);
     }
 
-    @GetMapping("/active-account")
+    @GetMapping(value = "/active-account")
     public ResponseEntity<?> activeAccount(@RequestParam String token){
         return authService.activeAccount(token);
     }
 
+    @PostMapping(value = "/fetch")
+    public ResponseEntity<?> fetchUser (@RequestBody UserRequestModel data) {
+        return authService.fetchUser(data);
+    }
 }

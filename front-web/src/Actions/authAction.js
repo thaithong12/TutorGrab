@@ -1,4 +1,4 @@
-import axios from 'axios'
+import {axios} from '../Interceptor'
 import ToastServive from 'react-material-toast';
 import {API_URL, END_POINT_LOGIN, LOGIN_ACCOUNT} from "../Constants/Constant";
 import {history} from "../Helper/history";
@@ -15,18 +15,15 @@ export const login = (userRequest = {email: '', password: ''}) => {
             email: userRequest.username,
             password: userRequest.password
         }
-        console.log(authenticationRequest)
         return await axios.post(API_URL + END_POINT_LOGIN, authenticationRequest).then(res => {
             if (res.data) {
                 const obj = {loggedIn: true, ...res.data};
                 /*if (obj.authorization.includes("ROLE_ADMIN")) {
                     obj.isAdmin = true;
                 } else obj.isAdmin = false;*/
-                console.log(obj)
                 localStorage.setItem("Authorization", res.data.jwt);
                 localStorage.setItem("user", JSON.stringify(obj));
                 history.push('/')
-                console.log('da vao chuyen')
                 dispatch(_login(res.data));
             } else {
                 toast.error("Username or Password not valid", () => {
@@ -34,12 +31,13 @@ export const login = (userRequest = {email: '', password: ''}) => {
                 })
             }
         }).catch(err => {
-            console.log(err);
+            toast.error(err.response.data.message, () => {
+            })
         })
     }
-}
+};
 
 export const _login = (user) => ({
     type: LOGIN_ACCOUNT,
     user
-})
+});

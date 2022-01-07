@@ -3,22 +3,12 @@ package com.thaithong.datn.entity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.thaithong.datn.enums.DifficultType;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -32,6 +22,7 @@ public class AssignmentEntity extends BaseEntity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String title;
 
+    @Lob
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String content;
 
@@ -51,6 +42,10 @@ public class AssignmentEntity extends BaseEntity {
     @Column(name = "is_deleted")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isDeleted;
+
+    @Column(name = "grade")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String grade;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assignment")
     private List<UserAssignment> userAssignments;

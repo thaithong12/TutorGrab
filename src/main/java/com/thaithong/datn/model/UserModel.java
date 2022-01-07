@@ -1,17 +1,13 @@
 package com.thaithong.datn.model;
 
-import lombok.AllArgsConstructor;
+import com.thaithong.datn.enums.AccountRole;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 public class UserModel implements UserDetails {
 
     private String username;
@@ -22,20 +18,7 @@ public class UserModel implements UserDetails {
 
     private Collection authorities;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-    }
-
-    @Override
-    public String getPassword() {
-        return null;
-    }
-
-    @Override
-    public String getUsername() {
-        return null;
-    }
+    private List<AccountRole> roles;
 
     @Override
     public boolean isAccountNonExpired() {

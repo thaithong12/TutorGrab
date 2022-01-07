@@ -6,6 +6,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -42,7 +43,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (null != user) {
             Set<GrantedAuthority> authorities = new HashSet<>();
-            user.getAuthorities().forEach(p -> authorities.add(new SimpleGrantedAuthority(p.toString())));
+            user.getRoles().forEach(p -> authorities.add(new SimpleGrantedAuthority(p.toString())));
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(user, null, authorities);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

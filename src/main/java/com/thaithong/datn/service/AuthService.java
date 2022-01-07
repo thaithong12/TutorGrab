@@ -6,6 +6,8 @@ import com.thaithong.datn.entity.RoleEntity;
 import com.thaithong.datn.entity.UserEntity;
 import com.thaithong.datn.enums.AccountRole;
 import com.thaithong.datn.model.JwtRequestModel;
+import com.thaithong.datn.model.UserModel;
+import com.thaithong.datn.model.UserRequestModel;
 import com.thaithong.datn.utils.CustomErrorException;
 import com.thaithong.datn.utils.ErrorObject;
 import com.thaithong.datn.utils.StaticVariable;
@@ -18,10 +20,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.http.Cookie;
@@ -31,6 +35,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -58,6 +63,9 @@ public class AuthService {
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     /**
      * ユーザーを作成
@@ -116,8 +124,9 @@ public class AuthService {
         try {
             var user = userService.findByEmail(authenticationRequest.getEmail());
             authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword(), user);
+            checkIsAuthorizedAndIsActivated (user);
             var userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
-            var token = jwtTokenUtil.generateToken(userDetails);
+            var token = jwtTokenUtil.generateToken(getUserModel(userDetails, user));
             var jwtAuthToken = new Cookie(StaticVariable.SECURE_COOKIE, token);
             jwtAuthToken.setHttpOnly(true);
             jwtAuthToken.setSecure(false);
@@ -128,12 +137,38 @@ public class AuthService {
             response.addCookie(jwtAuthToken);
             user.setJwt(token);
             user.setTokenExpDate(generateExpirationDate());
+            userService.saveUser(user);
             return ResponseEntity.status(HttpStatus.OK).body(userMapper.toUserResponseModel(user));
         } catch (CustomErrorException customErrorException) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(customErrorException.getData());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+    private void checkIsAuthorizedAndIsActivated(UserEntity u) {
+        if (!u.getIsActivated()) {
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400000", "Account is not activated"));
+        }
+        if (u.getAccountRoles().get(0).getRole().equals(AccountRole.ROLE_TEACHER) && !u.getIsAuthorized()) {
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400000", "Account is not authorized, pls wait!"));
+        }
+    }
+
+    private UserModel getUserModel(UserDetails userDetails, UserEntity userEntity) {
+        var userModel = new UserModel();
+        userModel.setUserId(userEntity.getId());
+        userModel.setUsername(userDetails.getUsername());
+        userModel.setPassword(userDetails.getPassword());
+        userModel.setAuthorities(userDetails.getAuthorities());
+        var roles = userEntity.getAccountRoles()
+                .stream()
+                .map(RoleEntity::getRole)
+                .collect(Collectors.toList());
+        userModel.setRoles(roles);
+        return userModel;
     }
 
     private void authenticate(String username, String password, UserEntity userEntity) {
@@ -242,4 +277,19 @@ public class AuthService {
         if (model.getPhoneNumber() == null || model.getPhoneNumber().isEmpty() || model.getPhoneNumber().isBlank())
             throw new CustomErrorException(HttpStatus.BAD_REQUEST, new ErrorObject("E400001", "phonenumber can not be null"));
     }
+
+    /**
+     * @param authorizationHeader
+     * @return
+     */
+    public ResponseEntity<?> fetchUser(UserRequestModel authorizationHeader) {
+        UserModel user = null;
+        if (StringUtils.hasText(authorizationHeader.getJwt()) && authorizationHeader.getJwt().startsWith("Token ")) {
+            String jwt = authorizationHeader.getJwt().substring(6);
+            user = jwtUtil.getUserFromToken(jwt);
+        }
+        return ResponseEntity.ok(user);
+    }
 }
+
+

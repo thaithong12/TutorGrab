@@ -45,7 +45,7 @@ public class GroupService {
         var groupResponseModel = new GroupResponseModel();
         groupResponseModel.setId(groupEntity.getId());
         groupResponseModel.setName(groupEntity.getName());
-        groupResponseModel.setUserId(groupEntity.getCreatedBy());
+        //groupResponseModel.setUserId(groupEntity.getCreatedBy());
         groupResponseModel.setIsClosed(groupEntity.getIsClosed());
 
         groupResponseModel.setAssignment(assignmentService.getAssignment(groupEntity.getAssignmentId()));

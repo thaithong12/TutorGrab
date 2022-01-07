@@ -19,9 +19,11 @@ public class SubjectResponseModel {
 
     private Date updatedAt;
 
-    private Long createdBy;
+    private String createdBy;
 
-    private Long updatedBy;
+    private String updatedBy;
 
     private String name;
+
+    private String image;
 }

@@ -4,6 +4,7 @@ import {history} from './Helper/history';
 import React from "react";
 import HomeDefault from "./Components/Users/Home/HomeDefault";
 import AuthHome from "./Components/Users/Auth/AuthHome";
+import "./Interceptor"
 
 function App() {
     return (

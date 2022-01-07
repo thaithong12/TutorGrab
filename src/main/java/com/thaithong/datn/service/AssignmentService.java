@@ -14,10 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,19 +67,30 @@ public class AssignmentService {
         assignmentRepository.save(ass);
     }
 
-    public List<AssignmentEntity> getAssignmentByAnsweredIdOrPutterId(Long userId, String who) {
+    public List<AssignmentResponseModel> getAssignmentByAnsweredIdOrPutterId(Long userId, String who) {
         List<UserAssignment> userAssignments;
+        var listReturn = new ArrayList<AssignmentResponseModel>();
         if (who.equals("putter")) {
             userAssignments = userAssignmentRepository.findByRequestId(userId);
         } else {
             userAssignments = userAssignmentRepository.findByResponseId(userId);
         }
         if (!CollectionUtils.isEmpty(userAssignments)) {
-            return userAssignments.stream()
+            AtomicInteger i = new AtomicInteger(0);
+            userAssignments.stream()
                     .map(UserAssignment::getAssignment)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList()).forEach(item -> {
+                var temp = convertEntityToResponseModel(item);
+                temp.setRequestId(userAssignments.get(i.get()).getRequestId());
+                temp.setResponseId(userAssignments.get(i.get()).getResponseId());
+                temp.setRate(userAssignments.get(i.get()).getRate());
+                temp.setReason(userAssignments.get(i.get()).getReason());
+                listReturn.add(temp);
+
+                i.incrementAndGet();
+            });
         }
-        return new ArrayList<>();
+        return listReturn;
     }
 
     private List<AssignmentResponseModel> handleOption(int indicator) {
@@ -100,9 +114,13 @@ public class AssignmentService {
         }
     }
 
-    public AssignmentResponseModel updateAssignment (Long id, AssignmentRequestModel requestModel) {
+    public AssignmentResponseModel updateAssignment(Long id, AssignmentRequestModel requestModel) {
         var assignment = assignmentRepository.findByIdAndIsDeleted(id, false);
         throwNotFoundException(id, assignment);
+        if (assignment.getIsAnswered()) {
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400001", "Cannot update this assignment!"));
+        }
         assignment.setTitle(requestModel.getTitle());
         assignment.setContent(requestModel.getContent());
         assignment.setIsAnswered(requestModel.getIsAnswered());
@@ -111,13 +129,19 @@ public class AssignmentService {
 
         var subject = subjectRepository.findById(requestModel.getSubjectId());
         if (subject.isEmpty()) {
-            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
-                    new ErrorObject("E400001", "Subject is not exist"));
+            //throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+            //new ErrorObject("E400001", "Subject is not exist"));
         } else {
-            assignment.setSubject(subject.get());
-
+            //assignment.setSubject(subject.get());
         }
-        assignmentRepository.save(assignment);
+
+        var ass = assignmentRepository.save(assignment);
+        var userAss = new UserAssignment();
+        userAss.setAssignment(ass);
+
+        //userAss.setRequestId(ass.getId());
+        // TODO
+        userAss.setRequestId(1L);
 
         return getAssignment(id);
     }
@@ -129,28 +153,37 @@ public class AssignmentService {
         }
     }
 
+    @Transactional(rollbackOn = Exception.class)
     public void createAssignment(AssignmentRequestModel requestModel) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        UserModel userModel = (UserModel) authentication.getPrincipal();
+        //Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        //UserModel userModel = (UserModel) authentication.getPrincipal();
         if (!Objects.isNull(requestModel)) {
-            if (!Objects.isNull(requestModel.getSubjectId())) {
-                var subject = subjectRepository.findById(requestModel.getSubjectId());
-                if (subject.isEmpty()) {
-                    throw new CustomErrorException(HttpStatus.BAD_REQUEST,
-                            new ErrorObject("E400001", "Subject is not exist"));
-                } else {
-                    var ass = new AssignmentEntity();
-                    ass.setContent(requestModel.getContent());
-                    ass.setTitle(requestModel.getTitle());
-                    ass.setDifficultType(requestModel.getDifficultType());
-                    ass.setIsAnswered(false);
-                    ass.setIsPublished(false);
-                    ass.setIsDeleted(false);
-                    ass.setSubject(subject.get());
-                    assignmentRepository.save(ass);
-                }
-            }
+            var ass = new AssignmentEntity();
+            ass.setContent(requestModel.getContent());
+            ass.setTitle(requestModel.getTitle());
+            ass.setDifficultType(requestModel.getDifficultType());
+            ass.setIsAnswered(false);
+            ass.setIsPublished(false);
+            ass.setIsDeleted(false);
+            ass.setGrade(requestModel.getGrade());
 
+            var subject = subjectRepository.findByName(requestModel.getSubjectName());
+            if (ObjectUtils.isEmpty(subject)) {
+
+            } else {
+                ass.setSubject(subject);
+            }
+            var temp = assignmentRepository.save(ass);
+
+            var userAssignment = new UserAssignment();
+
+            userAssignment.setRequestId(2L);
+            userAssignment.setAssignment(temp);
+            userAssignment.setIsCompleted(false);
+            userAssignment.setIsRejected(false);
+            userAssignment.setIsRejected(false);
+
+            userAssignmentRepository.save(userAssignment);
         }
     }
 
@@ -167,6 +200,17 @@ public class AssignmentService {
         ass.setIsAnswered(assignmentEntity.getIsAnswered());
         ass.setIsDeleted(assignmentEntity.getIsDeleted());
         ass.setIsPublished(assignmentEntity.getIsPublished());
+        ass.setGrade(assignmentEntity.getGrade());
+
+        var assRelation = assignmentEntity.getUserAssignments()
+                .stream()
+                .filter(item -> item.getAssignment().getId() == ass.getId())
+                .findFirst().orElse(new UserAssignment());
+        ass.setRequestId(assRelation.getRequestId());
+        ass.setResponseId(assRelation.getResponseId());
+        ass.setRate(assRelation.getRate());
+        ass.setIsRejected(assRelation.getIsRejected());
+        ass.setReason(assRelation.getReason());
         if (!Objects.isNull(assignmentEntity.getSubject())) {
             var subj = new SubjectResponseModel();
             subj.setId(assignmentEntity.getSubject().getId());
@@ -175,8 +219,18 @@ public class AssignmentService {
             subj.setUpdatedAt(assignmentEntity.getSubject().getUpdatedAt());
             subj.setUpdatedBy(assignmentEntity.getSubject().getUpdatedBy());
             subj.setName(assignmentEntity.getSubject().getName());
+            subj.setImage(assignmentEntity.getSubject().getImage());
             ass.setSubject(subj);
         }
         return ass;
+    }
+
+    public List<AssignmentResponseModel> getAllPublishedAssignment() {
+        var data = assignmentRepository.findByIsAnsweredAndIsPublishedAndIsDeleted(true, true, false);
+        var listReturn = new ArrayList<AssignmentResponseModel>();
+        if (!CollectionUtils.isEmpty(data)) {
+            data.forEach(item -> listReturn.add(convertEntityToResponseModel(item)));
+        }
+        return listReturn;
     }
 }

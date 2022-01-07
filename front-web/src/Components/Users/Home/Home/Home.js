@@ -1,10 +1,65 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Header from "../Header";
 import HomeScript from "../HomeScript";
 import Footer from "../Footer";
+import {useDispatch, useSelector} from "react-redux";
+import {_publishedAssignment, _topUser, publishedAssignment, topUser} from "../../../../Actions/homeAction";
+import {Link} from "react-router-dom";
+import axios from "axios";
+import {API_URL, END_POINT_PUBLISHED_ASSIGNMENT, END_POINT_TOP_USER} from "../../../../Constants/Constant";
+import TimeAgo from 'timeago-react';
+import ChatHome from "../../OnlineChat/ChatHome";
 
 export default function Home() {
-    console.log('vao home')
+    const dispatch = useDispatch();
+
+    const topUserState = useSelector(state => state.topUser);
+
+    const [publishedAssignmentState, setPublishedList] = useState([]);
+
+    const [topUserLeft, setUserLeft] = useState({});
+    const [topUserRight , setUserRight] = useState([]);
+    const [currentPage, setCurrentPage] = useState(0);  //trang hiện tại
+    const [dataPerPage, setDataPerPage] = useState(3); //tin tức mỗi trang
+    const [currentTodos, setCurrentTodo] = useState([]); //*cắt* dữ liệu ban đầu, lấy ra 1 mảng dữ liệu mới cho trang hiện tại
+    const [pages, setPages] = useState([]);
+
+    useEffect(() => {
+        async function fetchData() {
+            //await dispatch(topUser());
+            await axios.get(API_URL + END_POINT_TOP_USER).then(res => {
+                dispatch(_topUser(res.data));
+                setUserLeft([...res.data][0]);
+            }).catch(err => {
+                console.log(err);
+            })
+            //await dispatch(publishedAssignment());
+            await axios.get(API_URL + END_POINT_PUBLISHED_ASSIGNMENT).then(res => {
+                dispatch(_publishedAssignment(res.data));
+                setPublishedList([...res.data])
+                setCurrentTodo([...res.data].slice(0, 0 + dataPerPage));
+                createPages(res.data);
+            }).catch(err => {
+                console.log(err);
+            })
+        }
+
+        async function createPages(listData) {
+            let arr = []
+            for (let i = 0; i < Math.ceil(listData.length / dataPerPage); i++) {
+                arr[i] = i;
+            }
+            await setPages([...arr]);
+        }
+
+        fetchData();
+    }, []);
+
+    function handleChangePage(index) {
+        setCurrentPage(index);
+        setCurrentTodo([...publishedAssignmentState].slice(index* dataPerPage, index*dataPerPage + dataPerPage));
+    }
+
     return (
         <div>
             <div className={'site-wrap'} id={'home-section'}>
@@ -28,58 +83,72 @@ export default function Home() {
                             <div className="col-lg-8">
                                 <div className="box h-100">
                                     <div className="d-flex align-items-center">
-                                        <div className="img"><img src="ximg_1.jpg.pagespeed.ic.fJQ6KqbRC8.jpg"
-                                                                  tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_1.jpg.pagespeed.ic.fJQ6KqbRC8.jpg"
-                                                                  className="img-fluid" alt="Image"/></div>
-                                        <div className="text">
-                                            <a href="#" className="category">Tutorial</a>
-                                            <h3><a href="#">Learning React Native</a></h3>
-                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum quidem
-                                                totam
-                                                exercitationem eveniet
-                                                blanditiis nulla, et possimus, itaque alias maxime!</p>
-                                            <p className="mb-0">
-                                                <span className="brand-react h5"></span>
-                                                <span className="brand-javascript h5"></span>
-                                            </p>
-                                            <p className="meta">
-                                                <span className="mr-2 mb-2">1hr 24m</span>
-                                                <span className="mr-2 mb-2">Advanced</span>
-                                                <span className="mr-2 mb-2">Jun 18, 2020</span>
-                                            </p>
-                                        </div>
+                                        {
+                                            topUserState && topUserState.length > 0 ? (
+                                                <>
+                                                    <div className="img">
+                                                        <img className="img-fluid"
+                                                             src={"image/user1.jpg"}
+                                                             alt=""/>
+                                                        {/*<img src={"image/" + topUserState[0].responseInfo.avatar}*/}
+                                                        {/*className="img-fluid" alt="Image"/>*/}
+                                                    </div>
+
+                                                    <div className="text">
+                                                        <a href="#" className="category">Top 1</a>
+                                                        <h3><a href="#">{topUserState[0].responseInfo.name}</a></h3>
+                                                        <p>Co gang het minh vi su nghiep giao duc</p>
+                                                        <p className="mb-0">
+                                                            {new Array(Math.floor(topUserState[0].rate)).fill(null).map(() => (
+                                                                <span className="icon-star h5"></span>
+                                                            ))}
+                                                            {
+                                                                !Number.isInteger(topUserState[0].rate) ? <span
+                                                                    className="icon-star-half-full h5"></span> : ''
+                                                            }
+                                                        </p>
+                                                        <p className="meta">
+                                                            <span className="mr-2 mb-2 text-black">Total answered assignment </span>
+                                                            <span className="mr-2 mb-2 text-danger"><strong>200</strong></span>
+                                                        </p>
+                                                    </div>
+                                                </>
+                                            ) : ''
+                                        }
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-lg-4">
-                                <div className="box small h-100">
-                                    <div className="d-flex align-items-center mb-2">
-                                        <div className="img"><img src="ximg_2.jpg.pagespeed.ic.bTdcnNpvA1.jpg"
-                                                                  tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_2.jpg.pagespeed.ic.bTdcnNpvA1.jpg"
-                                                                  className="img-fluid" alt="Image"/></div>
-                                        <div className="text">
-                                            <a href="#" className="category">Tutorial</a>
-                                            <h3><a href="#">Learning React Native</a></h3>
-                                        </div>
-                                    </div>
-                                    <div className="d-flex align-items-center mb-2">
-                                        <div className="img"><img src="img_3.jpg"
-                                                                  tppabs="https://preview.colorlib.com/theme/tutor/images/img_3.jpg"
-                                                                  className="img-fluid" alt="Image"/></div>
-                                        <div className="text">
-                                            <a href="#" className="category">Tutorial</a>
-                                            <h3><a href="#">Learning React Native</a></h3>
-                                        </div>
-                                    </div>
-                                    <div className="d-flex align-items-center">
-                                        <div className="img"><img src="img_4.jpg"
-                                                                  tppabs="https://preview.colorlib.com/theme/tutor/images/img_4.jpg"
-                                                                  className="img-fluid" alt="Image"/></div>
-                                        <div className="text">
-                                            <a href="#" className="category">Tutorial</a>
-                                            <h3><a href="#">Learning React Native</a></h3>
-                                        </div>
-                                    </div>
+                            <div className="col-lg-4" style={{zIndex: 1}}>
+                                <div className="box small h-100" >
+                                    {
+                                        topUserState && topUserState.length > 1 ?
+                                            topUserState.map((val, index) => (
+                                                <div className="d-flex align-items-center mb-2">
+                                                    <div className="img">
+                                                        <img src={"image/user2.jpg"}
+                                                             className="img-fluid" alt="Image"/>
+                                                        {/*<img src={"image/" + val.responseInfo.avatar}*/}
+                                                        {/*                      className="img-fluid" alt="Image"/>*/}
+                                                    </div>
+                                                    <div className="text">
+                                                        <a href="#" className="category">Top {index + 2}</a> <br/>
+                                                        <a href="#" className="category">{val.responseInfo.name}</a>
+                                                        <br/>
+                                                        {new Array(Math.floor(val.rate)).fill(null).map(() => (
+                                                            <span className="icon-star h5"></span>
+                                                        ))}
+                                                        {
+                                                            !Number.isInteger(val.rate) ?
+                                                                <span className="icon-star-half-full h5"></span> : ''
+                                                        }
+                                                        <h3><a href="#">Total answered assignment:<strong
+                                                            className="text-danger">100</strong></a></h3>
+                                                    </div>
+                                                </div>
+                                            )) : ''
+                                    }
+
+
                                 </div>
                             </div>
                         </div>
@@ -167,112 +236,50 @@ export default function Home() {
                                     <h2>Tutorials</h2>
                                 </div>
                             </div>
-                            <div className="col-lg-8">
-                                <div className="d-flex tutorial-item mb-4">
-                                    <div className="img-wrap">
-                                        <a href="#"><img src="ximg_1.jpg.pagespeed.ic.fJQ6KqbRC8.jpg"
-                                                         tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_1.jpg.pagespeed.ic.fJQ6KqbRC8.jpg"
-                                                         alt="Image" className="img-fluid"/></a>
-                                    </div>
-                                    <div>
-                                        <h3><a href="#">Learning React Native</a></h3>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nam tempore, saepe
-                                            numquam. Doloremque
-                                            culpa tenetur facere quisquam, animi illum possimus!</p>
-                                        <p className="mb-0">
-                                            <span className="brand-react h5"></span>
-                                            <span className="brand-javascript h5"></span>
-                                        </p>
-                                        <p className="meta">
-                                            <span className="mr-2 mb-2">1hr 24m</span>
-                                            <span className="mr-2 mb-2">Advanced</span>
-                                            <span className="mr-2 mb-2">Jun 18, 2020</span>
-                                        </p>
-                                        <p><a href="tutorial-single.html"
-                                              tppabs="https://preview.colorlib.com/theme/tutor/tutorial-single.html"
-                                              className="btn btn-primary custom-btn">View</a></p>
-                                    </div>
-                                </div>
-                                <div className="d-flex tutorial-item mb-4">
-                                    <div className="img-wrap">
-                                        <a href="#"><img src="ximg_2.jpg.pagespeed.ic.bTdcnNpvA1.jpg"
-                                                         tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_2.jpg.pagespeed.ic.bTdcnNpvA1.jpg"
-                                                         alt="Image" className="img-fluid"/></a>
-                                    </div>
-                                    <div>
-                                        <h3><a href="#">Learning Angular 101</a></h3>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nam tempore, saepe
-                                            numquam. Doloremque
-                                            culpa tenetur facere quisquam, animi illum possimus!</p>
-                                        <p className="mb-0">
-                                            <span className="brand-angular h5"></span>
-                                            <span className="brand-javascript h5"></span>
-                                        </p>
-                                        <p className="meta">
-                                            <span className="mr-2 mb-2">1hr 24m</span>
-                                            <span className="mr-2 mb-2">Advanced</span>
-                                            <span className="mr-2 mb-2">Jun 18, 2020</span>
-                                        </p>
-                                        <p><a href="tutorial-single.html"
-                                              tppabs="https://preview.colorlib.com/theme/tutor/tutorial-single.html"
-                                              className="btn btn-primary custom-btn">View</a></p>
-                                    </div>
-                                </div>
-                                <div className="d-flex tutorial-item mb-4">
-                                    <div className="img-wrap">
-                                        <a href="#"><img src="img_3.jpg"
-                                                         tppabs="https://preview.colorlib.com/theme/tutor/images/img_3.jpg"
-                                                         alt="Image" className="img-fluid"/></a>
-                                    </div>
-                                    <div>
-                                        <h3><a href="#">Learning Photoshop</a></h3>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nam tempore, saepe
-                                            numquam. Doloremque
-                                            culpa tenetur facere quisquam, animi illum possimus!</p>
-                                        <p className="mb-0">
-                                            <span className="brand-adobephotoshop h5"></span>
-                                        </p>
-                                        <p className="meta">
-                                            <span className="mr-2 mb-2">1hr 24m</span>
-                                            <span className="mr-2 mb-2">Advanced</span>
-                                            <span className="mr-2 mb-2">Jun 18, 2020</span>
-                                        </p>
-                                        <p><a href="tutorial-single.html"
-                                              tppabs="https://preview.colorlib.com/theme/tutor/tutorial-single.html"
-                                              className="btn btn-primary custom-btn">View</a></p>
-                                    </div>
-                                </div>
-                                <div className="d-flex tutorial-item mb-4">
-                                    <div className="img-wrap">
-                                        <a href="#"><img src="img_4.jpg"
-                                                         tppabs="https://preview.colorlib.com/theme/tutor/images/img_4.jpg"
-                                                         alt="Image" className="img-fluid"/></a>
-                                    </div>
-                                    <div>
-                                        <h3><a href="#">Advance Illustrator</a></h3>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nam tempore, saepe
-                                            numquam. Doloremque
-                                            culpa tenetur facere quisquam, animi illum possimus!</p>
-                                        <p className="mb-0">
-                                            <span className="brand-adobeillustrator h5"></span>
-                                        </p>
-                                        <p className="meta">
-                                            <span className="mr-2 mb-2">1hr 24m</span>
-                                            <span className="mr-2 mb-2">Advanced</span>
-                                            <span className="mr-2 mb-2">Jun 18, 2020</span>
-                                        </p>
-                                        <p><a href="tutorial-single.html"
-                                              tppabs="https://preview.colorlib.com/theme/tutor/tutorial-single.html"
-                                              className="btn btn-primary custom-btn">View</a></p>
-                                    </div>
-                                </div>
+                            <div className="col-lg-8" style={{zIndex: 1}}>
+                                {
+                                    currentTodos && currentTodos.length > 0 ?
+                                        currentTodos.map((val, index) => (
+                                            <div className="d-flex tutorial-item mb-4">
+                                                <div className="img-wrap">
+                                                    <a href="#">
+                                                        <img src={"image/" + val.subject.image}
+                                                                     tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_1.jpg.pagespeed.ic.fJQ6KqbRC8.jpg"
+                                                                     alt="Image" className="img-fluid wrap-icon"/>
+                                                    </a>
+                                                </div>
+                                                <div>
+                                                    <h3><a href="#">{val.title}</a></h3>
+                                                    <p><strong>Subject: </strong> {val.subject.name} &emsp;<strong>Level: </strong>{val.grade}</p>
+                                                    <p className="mb-0">
+                                                        <span className="brand-react h5"></span>
+                                                        <span className="brand-javascript h5"></span>
+                                                    </p>
+                                                    <p className="meta">
+                                                        <span className="mr-2 mb-2"><TimeAgo datetime={val.createdAt} /></span>
+                                                    </p>
+                                                    <p><Link to={'/assignments/'+ val.id}
+                                                          tppabs="https://preview.colorlib.com/theme/tutor/tutorial-single.html"
+                                                          className="btn btn-primary custom-btn">View</Link></p>
+                                                </div>
+                                            </div>
+                                        )) : ''
+                                }
+
                                 <div className="custom-pagination">
                                     <ul className="list-unstyled">
-                                        <li><a href="#"><span>1</span></a></li>
-                                        <li><span>2</span></li>
-                                        <li><a href="#"><span>3</span></a></li>
-                                        <li><a href="#"><span>4</span></a></li>
-                                        <li><a href="#"><span>5</span></a></li>
+                                        {publishedAssignmentState && publishedAssignmentState.length > 1 ?
+                                            pages.map((value) => (
+                                                value === currentPage
+                                                    ? (<span style={{cursor: "pointer"}} onClick={e => {
+                                                        e.preventDefault();
+                                                        handleChangePage(value)
+                                                    }}>{value + 1}</span>)
+                                                    : (<Link style={{cursor: "pointer"}} onClick={e => {
+                                                        e.preventDefault();
+                                                        handleChangePage(value)
+                                                    }}>{value + 1}</Link>)
+                                            )) : ''}
                                     </ul>
                                 </div>
                             </div>
@@ -398,6 +405,7 @@ export default function Home() {
                     </div>
                 </div>
             </div>
+            <ChatHome />
             <HomeScript/>
             <Footer/>
         </div>

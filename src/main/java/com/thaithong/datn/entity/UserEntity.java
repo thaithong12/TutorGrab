@@ -48,6 +48,7 @@ public class UserEntity extends BaseEntity {
     private String avatar;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Column(columnDefinition="LONGTEXT")
     private String jwt;
 
     /**

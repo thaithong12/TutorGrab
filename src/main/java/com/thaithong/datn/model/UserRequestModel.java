@@ -12,8 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserRequestModel {
-//    private Long id;
-
     private String name;
 
     private String phoneNumber;
@@ -27,4 +25,6 @@ public class UserRequestModel {
     private Boolean isBlocked;
 
     private Boolean isAuthorized;
+
+    private String jwt;
 }

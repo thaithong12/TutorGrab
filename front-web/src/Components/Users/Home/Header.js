@@ -1,7 +1,54 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
+import {useSelector} from "react-redux";
+import axios from "axios";
+import {API_URL, END_POINT_FETCH_USER} from "../../../Constants/Constant";
+import {history} from "../../../Helper/history";
 
 export default function Header() {
+    const [curUrl, setCurUrl] = useState({url: '/home'});
+    useEffect(() => {
+        setCurUrl({...curUrl, url: window.location.href});
+    }, []);
+
+    let user = useSelector(state => state.user.user);
+
+    //
+    let initUser = {}
+    let [curUser, setUser] = useState({loggedIn: false});
+
+    useEffect(() => {
+        setUser({...user})
+
+        async function fetchData() {
+            let data = {
+                jwt: 'Token ' + localStorage.getItem("Authorization")
+            };
+            await axios.post(API_URL + END_POINT_FETCH_USER, data).then(res => {
+                if (res.data) {
+                    setUser({...res.data, loggedIn: true})
+                } else {
+                    setUser({...initUser, loggedIn: false})
+                    history.push('/sign-in');
+                }
+                console.log(res.data)
+            }).catch(err => {
+                console.log(err);
+            })
+        }
+
+        fetchData();
+
+    },[]);
+
+    function handleLogout (event) {
+        event.preventDefault();
+        localStorage.clear();
+        setUser({...initUser, loggedIn: false})
+        window.location.reload();
+        history.push('/sign-in')
+    }
+
     return (
         <div>
             <div className="site-mobile-menu site-navbar-target">
@@ -23,26 +70,44 @@ export default function Header() {
                         </div>
                         <div className="col-9  text-right">
                             <span className="d-inline-block d-lg-none"><a href="#"
-                                                                          className=" site-menu-toggle js-menu-toggle py-5 "><span
-                                className="icon-menu h3 text-black"></span></a></span>
+                                                                          className=" site-menu-toggle js-menu-toggle py-5 ">
+                                <span className="icon-menu h3 text-black"></span></a></span>
                             <nav className="site-navigation text-right ml-auto d-none d-lg-block" role="navigation">
                                 <ul className="site-menu main-menu js-clone-nav ml-auto ">
-                                    <li className="active">
-                                        <Link to='/'>Home</Link></li>
-                                    <li>
-                                        <Link to='/tutorials' className="nav-link">Tutorials</Link>
+                                    <li className={curUrl.url.includes('/home') || curUrl.url == 'http://localhost:3000/' ? "active" : ""}>
+                                        <Link to='/'>Home</Link>
                                     </li>
-                                    <li><a href="/sign-in"
-                                           tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html"
-                                           className="nav-link">SignIn</a></li>
-                                    <li><a href="/blogs" tppabs="https://preview.colorlib.com/theme/tutor/blog.html"
-                                           className="nav-link">Blog</a></li>
-                                    <li><a href="/about-us"
-                                           tppabs="https://preview.colorlib.com/theme/tutor/about.html"
-                                           className="nav-link">About</a></li>
-                                    <li><a href="/contact"
-                                           tppabs="https://preview.colorlib.com/theme/tutor/contact.html"
-                                           className="nav-link">Contact</a></li>
+                                    <li className={curUrl.url.includes('/assignments') ? "active" : ""}>
+                                        <Link to='/assignments' className="nav-link">Assignments</Link>
+                                    </li>
+                                    <li className={curUrl.url.includes('/blogs') ? "active" : ""}>
+                                        <Link to="/blogs" tppabs="https://preview.colorlib.com/theme/tutor/blog.html"
+                                              className="nav-link">Blog</Link></li>
+                                    <li className={curUrl.url.includes('/about-us') ? "active" : ""}>
+                                        <Link to="/about-us"
+                                              tppabs="https://preview.colorlib.com/theme/tutor/about.html"
+                                              className="nav-link">About</Link></li>
+                                    <li className={curUrl.url.includes('/contact') ? "active" : ""}>
+                                        <Link to="/contact"
+                                              tppabs="https://preview.colorlib.com/theme/tutor/contact.html"
+                                              className="nav-link">Contact</Link></li>
+                                    <li>
+                                        {
+                                            curUser && curUser.loggedIn ?
+                                                <>
+                                                    <Link className="nav-link"
+                                                        tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html">Hello {user.email}</Link>
+
+                                                    <Link to="/logout" onClick={handleLogout}
+                                                          tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html"
+                                                          className="nav-link">Logout</Link>
+                                                </>
+
+                                                : <Link to="/sign-in"
+                                            tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html"
+                                            className="nav-link">SignIn</Link>
+                                        }
+                                    </li>
                                 </ul>
                             </nav>
                         </div>

@@ -28,6 +28,9 @@ public class SubjectEntity extends BaseEntity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String name;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String image;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY)
     private List<AssignmentEntity> assignments;
 }
