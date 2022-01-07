@@ -25,10 +25,6 @@ export const login = (userRequest = {email: '', password: ''}) => {
                 localStorage.setItem("user", JSON.stringify(obj));
                 history.push('/')
                 dispatch(_login(res.data));
-            } else {
-                toast.error("Username or Password not valid", () => {
-
-                })
             }
         }).catch(err => {
             toast.error(err.response.data.message, () => {
