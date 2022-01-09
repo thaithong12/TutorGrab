@@ -7,17 +7,18 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
 import React, {useEffect, useState} from "react";
-import {createAssignment} from "../../../../../Actions/assignmentAction";
+import {createAssignment} from "../../../../../../Actions/assignmentAction";
 import {useDispatch, useSelector} from "react-redux";
 import ToastServive from "react-material-toast";
 import _ from "lodash";
-import {API_URL} from "../../../../../Constants/Constant";
-import {getAllSubject} from "../../../../../Actions/subjectAction";
+import {API_URL} from "../../../../../../Constants/Constant";
+import {getAllSubject} from "../../../../../../Actions/subjectAction";
 
 CKEditor.editorConfig = function (config) {
-    config.protectedSource.push(/\n/g);  };
+    config.protectedSource.push(/\n/g);
+};
 
-export default function NewAssignment () {
+export default function NewAssignment() {
     const toast = ToastServive.new({
         place: 'topRight',
         duration: 5,
@@ -32,8 +33,10 @@ export default function NewAssignment () {
         title: '',
         subject: '',
         grade: '',
-        content: ''
+        content: '',
+        userId: ''
     }
+    const user = useSelector(state => state.user.user);
 
     const subjects = useSelector(state => state.subjects);
 
@@ -46,10 +49,13 @@ export default function NewAssignment () {
     const grade = _.range(1, 13, 1);
 
     useEffect(() => {
-        dispatch(getAllSubject());
+        dispatch(getAllSubject()).then(() => {
+                if (user && user.id) {
+                    setAssignment({...assignmentReq, userId: user.id})
+                } else setAssignment({...assignmentReq})
+            }
+        );
     }, []);
-
-
 
     // Handle change Tab
     // const handleChange = (event, newValue) => {
@@ -59,37 +65,39 @@ export default function NewAssignment () {
     function handleSubmit(event) {
         event.preventDefault();
         setError({...initErr});
-        validatedAssignment ();
+        validatedAssignment();
         if (err.isErr) {
-            toast.error(err.msg.toUpperCase(), () => {});
+            toast.error(err.msg.toUpperCase(), () => {
+            });
             return;
         }
         dispatch(createAssignment(assignmentReq)).then(res => {
-            toast.success('Create assignment success!', () => {});
+            toast.success('Create assignment success!', () => {
+            });
             setAssignment({...initAssState});
         });
 
         setError({...initErr});
     }
 
-    function validatedAssignment () {
-        if (assignmentReq.title === ''){
+    function validatedAssignment() {
+        if (assignmentReq.title === '') {
             setError({...err, isErr: true, msg: 'Title cannot be null'})
         }
-        if (assignmentReq.subject === ''){
+        if (assignmentReq.subject === '') {
             setError({...err, isErr: true, msg: 'Subject cannot be null'})
         }
-        if (assignmentReq.grade === ''){
+        if (assignmentReq.grade === '') {
             setError({...err, isErr: true, msg: 'Grade cannot be null'})
         }
-        if (assignmentReq.content === ''){
+        if (assignmentReq.content === '') {
             setError({...err, isErr: true, msg: 'Content cannot be null'})
         }
     }
 
     function handleChangeAttrAssignment(event) {
         setAssignment({...assignmentReq, [event.target.name]: event.target.value});
-        validatedAssignment ();
+        validatedAssignment();
     }
 
     function resetAssignment(event) {
@@ -100,8 +108,8 @@ export default function NewAssignment () {
     return (
         <div>
 
-                <h2>New Assignment</h2>
-                <form style={{textAlign: "left"}} onSubmit={handleSubmit}>
+            <h2>New Assignment</h2>
+            <form style={{textAlign: "left"}} onSubmit={handleSubmit}>
                                 <span>
                                     <label style={{padding: 14, paddingBottom: 30}}>Title</label>
                                     <TextField id="outlined-basic" label="Enter Title" variant="outlined"
@@ -110,7 +118,7 @@ export default function NewAssignment () {
                                                value={assignmentReq.title}/>
                                 </span>
 
-                    <FormControl style={{width: "100%"}}>
+                <FormControl style={{width: "100%"}}>
                                         <span>
                                         <label style={{padding: 14, paddingBottom: 30}}>Subject</label>
                                         <Select
@@ -133,8 +141,8 @@ export default function NewAssignment () {
 
 
                                     </span>
-                    </FormControl>
-                    <FormControl style={{width: "100%"}}>
+                </FormControl>
+                <FormControl style={{width: "100%"}}>
                                         <span>
                                         <label style={{padding: 14, paddingBottom: 30}}>Class</label>
                                         <Select
@@ -155,40 +163,40 @@ export default function NewAssignment () {
 
 
                                     </span>
-                    </FormControl>
-                    <FormControl style={{width: "100%"}}>
+                </FormControl>
+                <FormControl style={{width: "100%"}}>
                                         <span>
                                         <label style={{padding: 14, paddingBottom: 30}}>Description</label>
 
 
                                             <CKEditor
-                                            config={{
-                                                extraPlugins: [uploadPlugin]
-                                            }}
-                                            editor={ClassicEditor}
-                                            data={assignmentReq.content}
-                                            onReady={editor => {
-                                                // You can store the "editor" and use when it is needed.
-                                                console.log('Editor is ready to use!', editor);
-                                            }}
-                                            onChange={(event, editor) => {
-                                                const data = editor.getData();
-                                                setAssignment({...assignmentReq, content: data})
-                                            }}
-                                        />
+                                                config={{
+                                                    extraPlugins: [uploadPlugin]
+                                                }}
+                                                editor={ClassicEditor}
+                                                data={assignmentReq.content}
+                                                onReady={editor => {
+                                                    // You can store the "editor" and use when it is needed.
+                                                    console.log('Editor is ready to use!', editor);
+                                                }}
+                                                onChange={(event, editor) => {
+                                                    const data = editor.getData();
+                                                    setAssignment({...assignmentReq, content: data})
+                                                }}
+                                            />
                                     </span>
-                    </FormControl>
-                    <div style={{padding: 30, marginLeft: "26%"}}>
-                        <Button variant="outlined" startIcon={<DeleteIcon/>}
-                                style={{marginRight: 10, width: "30%"}} onClick={resetAssignment}>
-                            Delete
-                        </Button>
-                        <Button type={"submit"} variant="contained" endIcon={<SendIcon/>}
-                                style={{width: "30%"}}>
-                            Send
-                        </Button>
-                    </div>
-                </form>
+                </FormControl>
+                <div style={{padding: 30, marginLeft: "26%"}}>
+                    <Button variant="outlined" startIcon={<DeleteIcon/>}
+                            style={{marginRight: 10, width: "30%"}} onClick={resetAssignment}>
+                        Delete
+                    </Button>
+                    <Button type={"submit"} variant="contained" endIcon={<SendIcon/>}
+                            style={{width: "30%"}}>
+                        Send
+                    </Button>
+                </div>
+            </form>
         </div>
     )
 }

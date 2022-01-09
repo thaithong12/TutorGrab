@@ -80,4 +80,13 @@ public class AssignmentController {
             return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
         }
     }
+
+    @GetMapping("/assignments/todo")
+    public ResponseEntity<?> getAllTodoAssignment () {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(assignmentService.getAllTodoAssignment());
+        } catch (CustomErrorException customErrorException) {
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
+        }
+    }
 }

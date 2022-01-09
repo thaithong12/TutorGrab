@@ -18,9 +18,6 @@ export const login = (userRequest = {email: '', password: ''}) => {
         return await axios.post(API_URL + END_POINT_LOGIN, authenticationRequest).then(res => {
             if (res.data) {
                 const obj = {loggedIn: true, ...res.data};
-                /*if (obj.authorization.includes("ROLE_ADMIN")) {
-                    obj.isAdmin = true;
-                } else obj.isAdmin = false;*/
                 localStorage.setItem("Authorization", res.data.jwt);
                 localStorage.setItem("user", JSON.stringify(obj));
                 history.push('/')

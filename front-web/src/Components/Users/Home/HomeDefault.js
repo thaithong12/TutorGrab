@@ -2,7 +2,7 @@ import React from "react";
 import Footer from "./Footer";
 import {BrowserRouter as Router, Route, Switch, useRouteMatch} from "react-router-dom";
 import Home from "./Home/Home";
-import Tutorials from "./Tutorials/Tutorials";
+import Assignment from "./Tutorials/Assignment";
 import Blog from "./Blog/Blog";
 import Contact from "./Contact/Contact";
 import AboutUs from "./AboutUs/About";
@@ -16,7 +16,7 @@ export default function HomeDefault() {
             <Route exact path={"/about-us"} component={AboutUs}/>
             <Route exact path="/contact" component={Contact}/>
             <Route exact path="/blogs" component={Blog}/>
-            <Route exact path="/assignments" component={Tutorials}/>
+            <Route exact path="/assignments" component={Assignment}/>
             <Route exact path={"/"} component={Home}/>
             <Route path={"/assignments/:id"} component={SingleAssignment} />
         </Switch>

@@ -167,7 +167,7 @@ public class AssignmentService {
             ass.setIsDeleted(false);
             ass.setGrade(requestModel.getGrade());
 
-            var subject = subjectRepository.findByName(requestModel.getSubjectName());
+            var subject = subjectRepository.findByName(requestModel.getSubject());
             if (ObjectUtils.isEmpty(subject)) {
 
             } else {
@@ -177,7 +177,7 @@ public class AssignmentService {
 
             var userAssignment = new UserAssignment();
 
-            userAssignment.setRequestId(2L);
+            userAssignment.setRequestId(requestModel.getUserId());
             userAssignment.setAssignment(temp);
             userAssignment.setIsCompleted(false);
             userAssignment.setIsRejected(false);
@@ -204,7 +204,7 @@ public class AssignmentService {
 
         var assRelation = assignmentEntity.getUserAssignments()
                 .stream()
-                .filter(item -> item.getAssignment().getId() == ass.getId())
+                .filter(item -> Objects.equals(item.getAssignment().getId(), ass.getId()))
                 .findFirst().orElse(new UserAssignment());
         ass.setRequestId(assRelation.getRequestId());
         ass.setResponseId(assRelation.getResponseId());
@@ -230,6 +230,15 @@ public class AssignmentService {
         var listReturn = new ArrayList<AssignmentResponseModel>();
         if (!CollectionUtils.isEmpty(data)) {
             data.forEach(item -> listReturn.add(convertEntityToResponseModel(item)));
+        }
+        return listReturn;
+    }
+
+    public List<AssignmentResponseModel> getAllTodoAssignment() {
+        var toAss = assignmentRepository.findAllTodoAssignment();
+        var listReturn = new ArrayList<AssignmentResponseModel>();
+        if (!CollectionUtils.isEmpty(toAss)) {
+            toAss.forEach(item -> listReturn.add(convertEntityToResponseModel(item)));
         }
         return listReturn;
     }

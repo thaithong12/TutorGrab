@@ -3,10 +3,13 @@ import Header from "../Header";
 import HomeScript from "../HomeScript";
 import Footer from "../Footer";
 import {Box, Tab, Tabs, Typography} from "@material-ui/core";
-import NewAssignment from "./MangeAssignment/NewAssignment";
-import MyAssignment from "./MangeAssignment/MyAssignment";
+import NewAssignment from "./MangeAssignment/Student/NewAssignment";
+import MyAssignment from "./MangeAssignment/Student/MyAssignment";
+import {useSelector} from "react-redux";
+import {TodoAssignment} from "./MangeAssignment/Tutor/TodoAssignment";
+import {CompletedAssignment} from "./MangeAssignment/Tutor/CompletedAssignment";
 
-export default function Tutorials() {
+export default function Assignment() {
     // Tab Panel Value`
     const [value, setValue] = React.useState(0);
 
@@ -14,6 +17,8 @@ export default function Tutorials() {
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+
+    let user = useSelector(state => state.user.user);
 
     return (
         <div>
@@ -35,20 +40,22 @@ export default function Tutorials() {
                     <Box sx={{width: '100%'}}>
                         <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
                             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                                <Tab label="New Assignment" {...a11yProps(0)} />
-                                <Tab label="My Assignment" {...a11yProps(1)} />
+                                <Tab label={user && user.roles[0] == 'ROLE_TEACHER' ? "Jobs" : "New Assignment"}
+                                     {...a11yProps(0)} />
+                                <Tab label={user && user.roles[0] == 'ROLE_TEACHER' ? "Completed Jobs" : "My Assignment"}  {...a11yProps(1)} />
                             </Tabs>
                         </Box>
                         <div style={{border: "1px solid", borderRadius: 10, marginTop: 15}}>
                             <TabPanel value={value} index={0}>
-                                <NewAssignment />
+                                {user && user.roles[0] == 'ROLE_TEACHER' ? <TodoAssignment/> : <NewAssignment/>}
+                            </TabPanel>
+                            <TabPanel value={value} index={1}>
+                                {user && user.roles[0] == 'ROLE_TEACHER' ? <CompletedAssignment/> : <MyAssignment/>}
                             </TabPanel>
 
                         </div>
 
-                        <TabPanel value={value} index={1}>
-                            <MyAssignment />
-                        </TabPanel>
+
                     </Box>
                 </div>
             </div>
