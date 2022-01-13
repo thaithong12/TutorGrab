@@ -26,6 +26,10 @@ public class AssignmentEntity extends BaseEntity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String content;
 
+    @Lob
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String textContent;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "difficult_type")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -34,6 +38,10 @@ public class AssignmentEntity extends BaseEntity {
     @Column(name = "is_answered")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isAnswered;
+
+    @Column(name = "answer")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String answer;
 
     @Column(name = "is_published")
     @JsonInclude(JsonInclude.Include.NON_NULL)

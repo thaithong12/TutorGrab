@@ -6,6 +6,7 @@ import com.thaithong.datn.model.AssignmentRequestModel;
 import com.thaithong.datn.model.AssignmentResponseModel;
 import com.thaithong.datn.model.SubjectResponseModel;
 import com.thaithong.datn.repository.AssignmentRepository;
+import com.thaithong.datn.repository.RequestRepository;
 import com.thaithong.datn.repository.SubjectRepository;
 import com.thaithong.datn.repository.UserAssignmentRepository;
 import com.thaithong.datn.utils.CustomErrorException;
@@ -35,6 +36,9 @@ public class AssignmentService {
     @Autowired
     private SubjectRepository subjectRepository;
 
+    @Autowired
+    private RequestRepository requestRepository;
+
     /**
      * @return すべて問題を返却
      */
@@ -63,8 +67,14 @@ public class AssignmentService {
     public void deleteAssignment(Long id) {
         var ass = assignmentRepository.findByIdAndIsDeleted(id, false);
         throwNotFoundException(id, ass);
-        ass.setIsDeleted(true);
-        assignmentRepository.save(ass);
+        var listRequest = requestRepository.findByAssignmentId(id);
+        if (!CollectionUtils.isEmpty(listRequest)) {
+            return;
+        }
+        //ass.setIsDeleted(true);
+        //assignmentRepository.save(ass);
+
+        assignmentRepository.delete(ass);
     }
 
     public List<AssignmentResponseModel> getAssignmentByAnsweredIdOrPutterId(Long userId, String who) {
@@ -116,8 +126,9 @@ public class AssignmentService {
 
     public AssignmentResponseModel updateAssignment(Long id, AssignmentRequestModel requestModel) {
         var assignment = assignmentRepository.findByIdAndIsDeleted(id, false);
+        var listRequest = requestRepository.findByAssignmentId(id);
         throwNotFoundException(id, assignment);
-        if (assignment.getIsAnswered()) {
+        if (assignment.getIsAnswered() || !CollectionUtils.isEmpty(listRequest)) {
             throw new CustomErrorException(HttpStatus.BAD_REQUEST,
                     new ErrorObject("E400001", "Cannot update this assignment!"));
         }
@@ -125,23 +136,22 @@ public class AssignmentService {
         assignment.setContent(requestModel.getContent());
         assignment.setIsAnswered(requestModel.getIsAnswered());
         assignment.setIsPublished(requestModel.getIsPublished());
-        assignment.setIsPublished(requestModel.getIsPublished());
 
-        var subject = subjectRepository.findById(requestModel.getSubjectId());
-        if (subject.isEmpty()) {
+        var subject = subjectRepository.findByName(requestModel.getSubject());
+        if (Objects.isNull(subject)) {
             //throw new CustomErrorException(HttpStatus.BAD_REQUEST,
             //new ErrorObject("E400001", "Subject is not exist"));
         } else {
-            //assignment.setSubject(subject.get());
+            assignment.setSubject(subject);
         }
 
         var ass = assignmentRepository.save(assignment);
-        var userAss = new UserAssignment();
+        /*var userAss = new UserAssignment();
         userAss.setAssignment(ass);
 
         //userAss.setRequestId(ass.getId());
         // TODO
-        userAss.setRequestId(1L);
+        userAss.setRequestId(1L);*/
 
         return getAssignment(id);
     }
@@ -166,8 +176,9 @@ public class AssignmentService {
             ass.setIsPublished(false);
             ass.setIsDeleted(false);
             ass.setGrade(requestModel.getGrade());
+            ass.setTextContent(requestModel.getTextContent());
 
-            var subject = subjectRepository.findByName(requestModel.getSubjectName());
+            var subject = subjectRepository.findByName(requestModel.getSubject());
             if (ObjectUtils.isEmpty(subject)) {
 
             } else {
@@ -177,7 +188,7 @@ public class AssignmentService {
 
             var userAssignment = new UserAssignment();
 
-            userAssignment.setRequestId(2L);
+            userAssignment.setRequestId(requestModel.getUserId());
             userAssignment.setAssignment(temp);
             userAssignment.setIsCompleted(false);
             userAssignment.setIsRejected(false);
@@ -201,10 +212,12 @@ public class AssignmentService {
         ass.setIsDeleted(assignmentEntity.getIsDeleted());
         ass.setIsPublished(assignmentEntity.getIsPublished());
         ass.setGrade(assignmentEntity.getGrade());
+        ass.setTextContent(assignmentEntity.getTextContent());
+        ass.setAnswer(assignmentEntity.getAnswer());
 
         var assRelation = assignmentEntity.getUserAssignments()
                 .stream()
-                .filter(item -> item.getAssignment().getId() == ass.getId())
+                .filter(item -> Objects.equals(item.getAssignment().getId(), ass.getId()))
                 .findFirst().orElse(new UserAssignment());
         ass.setRequestId(assRelation.getRequestId());
         ass.setResponseId(assRelation.getResponseId());
@@ -232,5 +245,28 @@ public class AssignmentService {
             data.forEach(item -> listReturn.add(convertEntityToResponseModel(item)));
         }
         return listReturn;
+    }
+
+    public List<AssignmentResponseModel> getAllTodoAssignment() {
+        var toAss = assignmentRepository.findAllTodoAssignment();
+        var listReturn = new ArrayList<AssignmentResponseModel>();
+        if (!CollectionUtils.isEmpty(toAss)) {
+            toAss.forEach(item -> listReturn.add(convertEntityToResponseModel(item)));
+        }
+        return listReturn;
+    }
+
+    public AssignmentResponseModel updateAnswerAssignment(Long id, AssignmentRequestModel requestModel) {
+        var assEntity = assignmentRepository.findById(id);
+        if (assEntity.isEmpty()) {
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400001", "Cannot update this assignment!"));
+        }
+        var obj = assEntity.get();
+        obj.setIsAnswered(true);
+        obj.setAnswer(requestModel.getAnswer());
+
+        obj = assignmentRepository.save(obj);
+        return convertEntityToResponseModel(obj);
     }
 }

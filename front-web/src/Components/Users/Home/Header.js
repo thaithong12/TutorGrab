@@ -37,16 +37,15 @@ export default function Header() {
             })
         }
 
-        fetchData();
+        fetchData().then(r => r);
 
-    },[]);
+    }, []);
 
-    function handleLogout (event) {
+    function handleLogout(event) {
         event.preventDefault();
         localStorage.clear();
         setUser({...initUser, loggedIn: false})
-        window.location.reload();
-        history.push('/sign-in')
+        history.push('/sign-in');
     }
 
     return (
@@ -65,7 +64,7 @@ export default function Header() {
                         <div className="col-3">
                             <div className="site-logo">
                                 <a href="index.html"
-                                   tppabs="https://preview.colorlib.com/theme/tutor/index.html"><strong>Tutor</strong></a>
+                                   tppabs="https://preview.colorlib.com/theme/tutor/index.html"><strong>Grab Tutor</strong></a>
                             </div>
                         </div>
                         <div className="col-9  text-right">
@@ -96,7 +95,7 @@ export default function Header() {
                                             curUser && curUser.loggedIn ?
                                                 <>
                                                     <Link className="nav-link"
-                                                        tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html">Hello {user.email}</Link>
+                                                          tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html">Hello {user.email}</Link>
 
                                                     <Link to="/logout" onClick={handleLogout}
                                                           tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html"
@@ -104,8 +103,8 @@ export default function Header() {
                                                 </>
 
                                                 : <Link to="/sign-in"
-                                            tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html"
-                                            className="nav-link">SignIn</Link>
+                                                        tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html"
+                                                        className="nav-link">SignIn</Link>
                                         }
                                     </li>
                                 </ul>

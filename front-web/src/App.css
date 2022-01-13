@@ -11,3 +11,24 @@
     max-width: 1000px;
     z-index: 2;
 }
+
+.drop-text {
+    word-break: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    line-height: 16px; /* fallback */
+    /*max-height: 32px; !* fallback *!*/
+    -webkit-line-clamp: 3; /* number of lines to show */
+    -webkit-box-orient: vertical;
+}
+
+.modal-custom {
+    background-color: aliceblue;
+    text-align: center;
+}
+
+.modal-custom button {
+    font-size: 15px;
+    padding: 12px;
+}

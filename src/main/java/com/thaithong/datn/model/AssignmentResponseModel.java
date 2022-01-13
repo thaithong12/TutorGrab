@@ -26,6 +26,8 @@ import java.util.Date;
 public class AssignmentResponseModel {
     private Long id;
 
+    private String textContent;
+
     private Date createdAt;
 
     private Date updatedAt;
@@ -57,6 +59,8 @@ public class AssignmentResponseModel {
     private Long requestId;
 
     private Long responseId;
+
+    private String answer;
 
     private SubjectResponseModel subject;
 }

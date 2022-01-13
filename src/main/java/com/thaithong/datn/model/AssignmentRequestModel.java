@@ -2,7 +2,6 @@ package com.thaithong.datn.model;
 
 import com.thaithong.datn.enums.DifficultType;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +13,8 @@ import lombok.Setter;
 public class AssignmentRequestModel {
     private String content;
 
+    private String textContent;
+
     private DifficultType difficultType;
 
     private String title;
@@ -22,9 +23,13 @@ public class AssignmentRequestModel {
 
     private String grade;
 
-    private String subjectName;
+    private String subject;
 
     private Boolean isAnswered;
 
     private Boolean isPublished;
+
+    private Long userId;
+
+    private String answer;
 }

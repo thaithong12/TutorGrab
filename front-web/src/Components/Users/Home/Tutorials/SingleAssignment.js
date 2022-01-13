@@ -3,26 +3,23 @@ import {useParams} from "react-router-dom";
 import Header from "../Header";
 import Footer from "../Footer";
 import {useDispatch, useSelector} from "react-redux";
-import {_getAssignmentDetail, createAssignment, getAssignmentDetail} from "../../../../Actions/assignmentAction";
+import {createAssignment, toast, updateAnswerAssignment, updateAssignment} from "../../../../Actions/assignmentAction";
 import {CKEditor} from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import {Button, MenuItem} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@mui/material/Select";
-import ToastServive from "react-material-toast";
 import _ from "lodash";
 import {getAllSubject} from "../../../../Actions/subjectAction";
-import {API_URL, END_POINT_ASSIGNMENT} from "../../../../Constants/Constant";
-import ReactHtmlParser from 'react-html-parser';
+import {API_URL, END_POINT_ASSIGNMENT, END_POINT_REQUEST_SOLVE_ASSIGNMENT} from "../../../../Constants/Constant";
 import {axios} from "../../../../Interceptor";
 import NotFound from "../../../NotFound";
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import {createRequestSolveForAssignment} from "../../../../Actions/requestAction";
+import SendIcon from '@mui/icons-material/Send';
 
-const toast = ToastServive.new({
-    place: 'topRight',
-    duration: 5,
-    maxCount: 20
-});
 export default function SingleAssignment() {
     const initErr = {
         isErr: false,
@@ -44,9 +41,11 @@ export default function SingleAssignment() {
 
     let [assignment, setData] = useState({...initAssState});
 
-    const [assignmentReq, setAssignment] = useState({...initAssState});
+    let [assignmentReq, setAssignment] = useState({...initAssState});
 
     const [err, setError] = useState({...initErr});
+
+    const [isSendRequest, setIsSendRequest] = useState(false);
 
     // 1 is View | 2 is Edit
     const [modeView, setMode] = useState(1);
@@ -55,6 +54,10 @@ export default function SingleAssignment() {
 
     const {id} = useParams();
     const [isEdit, setEdit] = useState(false);
+
+    let [difficultTypeState, setDifficult] = useState('VERY_EASY');
+
+    let [answer , setAnswer] = useState('');
 
     const options = {
         weekday: 'long',
@@ -68,20 +71,26 @@ export default function SingleAssignment() {
     useEffect(() => {
         dispatch(getAllSubject());
 
-        async function fetchData() {
-            await axios.get(API_URL + END_POINT_ASSIGNMENT + '/' + id).then(res => {
-                let subject = {...res.data.subject};
-                delete res.data.subject;
-                setData({...res.data, subjectObj: subject});
-            }).catch(err => {
-                console.log(err);
-            })
-        }
-
         fetchData();
     }, []);
-    console.log(assignment)
-    console.log(user)
+
+    async function fetchData() {
+        let temp = 0;
+        await axios.get(API_URL + END_POINT_ASSIGNMENT + '/' + id).then(res => {
+            let subject = {...res.data.subject};
+            delete res.data.subject;
+            setData({...res.data, subjectObj: subject});
+            setAssignment({...res.data, subjectObj: subject, subject: subject.name});
+            temp = res.data.id;
+            console.log(assignment)
+        }).catch(err => {
+            console.log(err);
+        })
+        await axios.get(API_URL + END_POINT_REQUEST_SOLVE_ASSIGNMENT + '/' + temp + '/' + user.id).then(res => {
+            setIsSendRequest(res.data);
+            console.log(res.data)
+        })
+    }
 
     function handleSubmit(event) {
         event.preventDefault();
@@ -121,60 +130,132 @@ export default function SingleAssignment() {
         validatedAssignment();
     }
 
-    function resetAssignment(event) {
-        event.preventDefault();
-        setAssignment({...initAssState});
-    }
-
     function handleModeEdit() {
         setEdit(!isEdit);
     }
 
+    function stripHtml(html) {
+        let tmp = document.createElement("DIV");
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || "";
+    }
+
+    function handleEditAssignment(event) {
+        event.preventDefault();
+        setError({...initErr});
+        validatedAssignment();
+        if (err.isErr) {
+            toast.error(err.msg.toUpperCase(), () => {
+            });
+            return;
+        }
+        assignmentReq.textContent = stripHtml(assignmentReq.content);
+
+        dispatch(updateAssignment(assignmentReq)).then(async res => {
+            toast.success('Update assignment success!', () => {
+            });
+            await fetchData();
+            setEdit(false);
+        })
+    }
+
+    async function handleSendRequest(event) {
+        event.preventDefault();
+        const requestObj = {
+            responseId: user.id,
+            assignmentId: assignment.id,
+            difficultType: difficultTypeState
+        }
+        dispatch(createRequestSolveForAssignment(requestObj));
+        //await fetchData();
+        window.location.reload();
+    }
+
+    async function handleSendAnswer (event) {
+        event.preventDefault();
+        if (answer == '') {
+            toast.error("Answer must not be null!!", () => {});
+            return;
+        }
+        assignmentReq.answer = answer;
+        dispatch(updateAnswerAssignment(assignmentReq));
+        await fetchData();
+    }
+
+    function changeDifficultType (event) {
+        setDifficult(event.target.value)
+    }
+
+    async function handleChangeUpload(event) {
+        event.preventDefault();
+        if (event.target.files[0] && event.target.files[0].size > 10e6) {
+            toast.error('File size cannot greater then 5MB', () => {
+            });
+            event.target.value = null;
+        } else {
+            const fileData = new FormData();
+
+            fileData.append("multipartFile", event.target.files[0]);
+
+            await axios.post(API_URL + '/upload', fileData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then(result => {
+                setAnswer(result.data[0]);
+                console.log(result.data[0])
+            }).catch(error => {
+                console.log(error);
+            })
+        }
+    }
+
     return (
-        assignment && (assignment.requestId == user.id || assignment.isPublished) ?
+        assignment && (assignment.requestId == user.id || assignment.isPublished
+            || assignment.responseId == user.id || assignment.isRejected || !assignment.responseId) ?
             (<div>
-            <div className={'site-wrap'} id={'home-section'}>
-                <Header/>
-                {/*banner start*/}
-                <div className="site-section-cover overlay" id={'site-section-cover'}>
-                    <div className="container">
-                        <div className="row align-items-center justify-content-center">
-                            <div className="col-lg-10 text-center">
-                                <h1>The <strong>Hub</strong> Of <strong>Tutorials</strong></h1>
+                <div className={'site-wrap'} id={'home-section'}>
+                    <Header/>
+                    {/*banner start*/}
+                    <div className="site-section-cover overlay" id={'site-section-cover'}>
+                        <div className="container">
+                            <div className="row align-items-center justify-content-center">
+                                <div className="col-lg-10 text-center">
+                                    <h1>The <strong>Hub</strong> Of <strong>Tutorials</strong></h1>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="site-section bg-light" style={{padding: 10}}>
-                <h6 className={'text-right'} style={{marginRight: '13%', color: 'darkblue'}}>
-                    <i>{new Date(assignment.createdAt).toLocaleDateString("en-US", options)}</i></h6>
+                <div className="site-section bg-light" style={{padding: 10, position: "relative"}}>
+                    <h6 className={'text-right'} style={{marginRight: '13%', color: 'darkblue'}}>
+                        <i>{new Date(assignment.createdAt).toLocaleDateString("en-US", options)}</i></h6>
 
 
-                <div className="container" style={{border: "2px solid black", borderRadius: 15}}>
+                    <div className="container" style={{border: "2px solid black", borderRadius: 15}}>
 
-                    {
-                        modeView === 1 && !isEdit ? (
-                            <>
-                                <h3 className={'text-center'}><strong><i>{assignment.title}</i></strong></h3>
-                                <div style={{textAlign: 'left'}}>
-                                    <h5 className={'text-left'}><strong>Subject
-                                        : <i>[{assignment.subject ? assignment.subject : 'Other'}]</i></strong></h5>
-                                    <h5 className={'text-left'}><strong>Grade
-                                        : <i>[{assignment.grade && assignment.grade.length > 0 ? assignment.grade : 'Other'}]</i></strong>
-                                    </h5>
-                                </div>
-                                <div style={{paddingBottom: 10}}>
-                                    <CKEditor
-                                        editor={ClassicEditor}
-                                        data={assignment.content}
-                                        disabled={true}
-                                    />
-                                    {/*{ ReactHtmlParser(assignment.content)}*/}
-                                </div>
-                            </>
-                        ) : (<form style={{textAlign: "left"}} onSubmit={handleSubmit}>
+                        {
+                            modeView === 1 && !isEdit ? (
+                                <>
+                                    <h3 className={'text-center'}><strong><i>{assignment.title}</i></strong></h3>
+                                    <div style={{textAlign: 'left'}}>
+                                        <h5 className={'text-left'}><strong>Subject
+                                            : <i>[{assignment.subject ? assignment.subject : 'Other'}]</i></strong></h5>
+                                        <h5 className={'text-left'}><strong>Grade
+                                            : <i>[{assignment.grade && assignment.grade.length > 0 ? assignment.grade : 'Other'}]</i></strong>
+                                        </h5>
+                                    </div>
+                                    <div style={{paddingBottom: 10}}>
+                                        <CKEditor
+                                            editor={ClassicEditor}
+                                            data={assignment.content}
+                                            disabled={true}
+                                        />
+                                        {/*{ ReactHtmlParser(assignment.content)}*/}
+                                    </div>
+                                </>
+                            ) : (<form style={{textAlign: "left"}} onSubmit={handleSubmit}>
                                 <span>
                                     <label style={{padding: 14, paddingBottom: 30}}>Title</label>
                                     <TextField id="outlined-basic" label="" variant="outlined"
@@ -183,7 +264,7 @@ export default function SingleAssignment() {
                                                value={assignmentReq.title}/>
                                 </span>
 
-                            <FormControl style={{width: "100%"}}>
+                                <FormControl style={{width: "100%"}}>
                                         <span>
                                         <label style={{padding: 14, paddingBottom: 30}}>Subject</label>
                                         <Select
@@ -202,11 +283,11 @@ export default function SingleAssignment() {
                                                     }) : ''
                                             }
                                             <MenuItem value={'other'}
-                                                      selected={'OTHER' === assignment.subject}>Other</MenuItem>
+                                                      selected={'OTHER' === assignment.subjectObj.name}>Other</MenuItem>
                                         </Select>
                                     </span>
-                            </FormControl>
-                            <FormControl style={{width: "100%"}}>
+                                </FormControl>
+                                <FormControl style={{width: "100%"}}>
                                         <span>
                                         <label style={{padding: 14, paddingBottom: 30}}>Class</label>
                                         <Select
@@ -228,8 +309,8 @@ export default function SingleAssignment() {
 
 
                                     </span>
-                            </FormControl>
-                            <FormControl style={{width: "100%"}}>
+                                </FormControl>
+                                <FormControl style={{width: "100%"}}>
                                         <span>
                                         <label style={{padding: 14, paddingBottom: 30}}>Description</label>
 
@@ -239,7 +320,7 @@ export default function SingleAssignment() {
                                                     extraPlugins: [uploadPlugin]
                                                 }}
                                                 editor={ClassicEditor}
-                                                data={assignmentReq.content}
+                                                data={assignment.content}
                                                 onReady={editor => {
                                                     // You can store the "editor" and use when it is needed.
                                                     console.log('Editor is ready to use!', editor);
@@ -250,26 +331,82 @@ export default function SingleAssignment() {
                                                 }}
                                             />
                                     </span>
-                            </FormControl>
-                            <div style={{padding: '1%', marginLeft: '81%'}}>
+                                </FormControl>
 
-                                <Button variant={"contained"}>SAVE</Button>
-                                <Button variant="outlined" style={{marginLeft: 16}}
-                                        onClick={handleModeEdit}>EDIT</Button>
-                            </div>
-                        </form>)
+                            </form>)
+                        }
+                        {
+                            assignment && !assignment.isAnswered && user && user.id == assignment.requestId ?
+                                <div style={{padding: '1%', marginLeft: '81%'}}>
+
+                                    <Button variant={"contained"} onClick={handleEditAssignment}>SAVE</Button>
+                                    <Button variant="outlined" style={{marginLeft: 16}}
+                                            onClick={handleModeEdit}>EDIT</Button>
+                                </div> : ''
+                        }
+                        {
+                            assignment && (((assignment.requestId === user.id) && assignment.isAnswered && assignment.responseId != undefined)
+                                || (assignment.isAnswered && assignment.isPublished)) ?
+                                <div style={{textAlign: "center", padding: 5}}>
+                                    <strong>Solved: </strong>
+                                    <a href={"http://localhost:3000/image/" + assignment.answer}>
+                                        <img width={400} height={200} src={"http://localhost:3000/image/" + assignment.answer}
+                                             tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_1_horizontal.jpg.pagespeed.ic.V8yJdSbNBp.jpg"
+                                             alt="Image" className="img-fluid"/>
+                                    </a>
+                                </div>
+
+                                :''
+                        }
+                    </div>
+                    {
+                        assignment && (!assignment.isAnswered || assignment.isRejected) && user && user.roles[0] == 'ROLE_TEACHER'
+                            ?
+                            <div className={'container'}>
+                                <h4 style={{color: "red"}} className={'text-center'}>Do you want to solve this
+                                    exercise?</h4>
+                                <Button><ArrowBackRoundedIcon/>Back</Button>
+                                <span className={'text-right'} style={{paddingLeft: "65%"}}>
+                                    {!isSendRequest ?
+                                        <>
+                                        <span style={{color: "#1976d2", fontWeight: "bold"}}>Level  </span>
+                                        <Select
+                                            label={"Difficult"}
+                                            style={{maxWidth: "17%"}}
+                                            name={'subject'}
+                                            onChange={changeDifficultType}
+                                            value={difficultTypeState}
+                                        >
+                                            <MenuItem value={'VERY_EASY'}>VERY_EASY</MenuItem>
+                                            <MenuItem value={'EASY'}>EASY</MenuItem>
+                                            <MenuItem value={'NORMAL'}>NORMAL</MenuItem>
+                                            <MenuItem value={'DIFFICULT'}>DIFFICULT</MenuItem>
+                                            <MenuItem value={'VERY_DIFFICULT'}>VERY_DIFFICULT</MenuItem>
+                                        </Select>
+                                        <Button onClick={handleSendRequest} className={'text'}><ArrowForwardIcon/>Ok</Button>
+
+                                        </>:
+                                        assignment && assignment.responseId != undefined ?
+                                            <p style={{marginLeft: 371}}>
+                                                <span>Send the Answer</span>
+                                                <input type={"file"} onChange={handleChangeUpload}/>
+                                                <Button onClick={handleSendAnswer} style={{marginRight: 500, marginTop: 24}}>Send<SendIcon/></Button>
+                                            </p> :
+                                            <span style={{color: "red"}}>You have already sent the request solve!!</span>
+                                    }
+
+                                </span>
+                            </div> : ''
                     }
-
-
-                    {/*{ReactHtmlParser(assignment.content)}*/}
+                    {
+                        assignment && (assignment.isAnswered && assignment.responseId == user.id ) ?
+                        <h3 className={'text-center'}>You have submitted your answer!!</h3> : ''
+                    }
                 </div>
-            </div>
-            {/*<HomeScript/>*/}
-            <Footer/>
-        </div>) : <NotFound />
+                <Footer/>
+            </div>) : <NotFound/>
     )
 }
-
 
 function uploadAdapter(loader) {
     return {

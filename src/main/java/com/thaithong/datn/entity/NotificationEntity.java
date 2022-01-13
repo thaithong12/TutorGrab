@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @EqualsAndHashCode(callSuper = true)
@@ -31,4 +32,7 @@ public class NotificationEntity extends BaseEntity {
 
     @Column(name = "is_read")
     private Boolean isRead;
+
+    @OneToOne(mappedBy = "notificationEntity")
+    private RequestEntity requestEntity;
 }
