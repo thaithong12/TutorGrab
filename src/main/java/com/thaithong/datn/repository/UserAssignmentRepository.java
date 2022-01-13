@@ -39,4 +39,6 @@ public interface UserAssignmentRepository extends CrudRepository<UserAssignment,
             "ORDER BY\n" +
             "\t`rate` DESC", nativeQuery = true)
     List<UserAssignment> findTopUser ();
+
+    UserAssignment findByResponseIdAndAssignmentId(Long responseId , Long assignmentId);
 }

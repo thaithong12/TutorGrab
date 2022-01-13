@@ -40,9 +40,9 @@ export default function Assignment() {
                     <Box sx={{width: '100%'}}>
                         <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
                             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                                <Tab label={user && user.roles[0] == 'ROLE_TEACHER' ? "Jobs" : "New Assignment"}
+                                <Tab label={user && user.roles[0] == 'ROLE_TEACHER' ? "Todo Assignments" : "New Assignment"}
                                      {...a11yProps(0)} />
-                                <Tab label={user && user.roles[0] == 'ROLE_TEACHER' ? "Completed Jobs" : "My Assignment"}  {...a11yProps(1)} />
+                                <Tab label={user && user.roles[0] == 'ROLE_TEACHER' ? "Completed Assignments" : "My Assignment"}  {...a11yProps(1)} />
                             </Tabs>
                         </Box>
                         <div style={{border: "1px solid", borderRadius: 10, marginTop: 15}}>

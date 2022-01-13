@@ -45,7 +45,6 @@ export default function Header() {
         event.preventDefault();
         localStorage.clear();
         setUser({...initUser, loggedIn: false})
-        window.location.reload();
         history.push('/sign-in');
     }
 
@@ -65,7 +64,7 @@ export default function Header() {
                         <div className="col-3">
                             <div className="site-logo">
                                 <a href="index.html"
-                                   tppabs="https://preview.colorlib.com/theme/tutor/index.html"><strong>Tutor</strong></a>
+                                   tppabs="https://preview.colorlib.com/theme/tutor/index.html"><strong>Grab Tutor</strong></a>
                             </div>
                         </div>
                         <div className="col-9  text-right">

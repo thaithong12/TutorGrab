@@ -13,6 +13,8 @@ import lombok.Setter;
 public class AssignmentRequestModel {
     private String content;
 
+    private String textContent;
+
     private DifficultType difficultType;
 
     private String title;
@@ -28,4 +30,6 @@ public class AssignmentRequestModel {
     private Boolean isPublished;
 
     private Long userId;
+
+    private String answer;
 }

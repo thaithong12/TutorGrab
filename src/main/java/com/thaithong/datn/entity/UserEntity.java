@@ -8,15 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
@@ -95,4 +87,8 @@ public class UserEntity extends BaseEntity {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<UserAssignment> userAssignments;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "creditcard_id", referencedColumnName = "id")
+    private CreditCardEntity creditCardEntity;
 }

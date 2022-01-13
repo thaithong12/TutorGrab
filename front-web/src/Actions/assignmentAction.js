@@ -6,6 +6,13 @@ import {
     GET_ALL_ASSIGNMENT_USER,
     GET_ASSIGNMENT, GET_TODO_LIST_ASSIGNMENT
 } from "../Constants/Constant";
+import ToastServive from "react-material-toast";
+
+export const toast = ToastServive.new({
+    place: 'topRight',
+    duration: 5,
+    maxCount: 20
+});
 
 export const createAssignment = (assignment) => {
     return async (dispatch) => {
@@ -16,6 +23,28 @@ export const createAssignment = (assignment) => {
         })
     }
 };
+
+export const updateAssignment = (assignment) => {
+    return async (dispatch) => {
+        return await axios.put(API_URL + END_POINT_ASSIGNMENT + "/" + assignment.id, assignment).then(res => {
+
+        }).catch((error) => {
+            toast.error(error.response.data.message.toUpperCase(), () => {
+            });
+        });
+    }
+}
+
+export const deleteAssignment = (id) => {
+    return async (dispatch) => {
+        return await axios.delete(API_URL + END_POINT_ASSIGNMENT + "/" + id).then(res => {
+
+        }).catch((error) => {
+            toast.error(error.response.data.message.toUpperCase(), () => {
+            });
+        });
+    }
+}
 
 export const getAllAssignment = () => {
     return async (dispatch) => {
@@ -36,9 +65,10 @@ export const getAssignmentsOfUser = (id, who) => {
     return async (dispatch) => {
         return await axios.get(API_URL + END_POINT_ASSIGNMENT + '/user/' + id + '/' + who).then(res => {
             dispatch(_getAssignmentsOfUser(res.data));
-        }).catch(err => {
-            console.log(err);
-        })
+        }).catch((error) => {
+            toast.error(error.response.data.message.toUpperCase(), () => {
+            });
+        });
     }
 };
 
@@ -52,9 +82,10 @@ export const getAssignmentDetail = (id) => {
         return await axios.get(API_URL + END_POINT_ASSIGNMENT + '/' + id).then(res => {
             dispatch(_getAssignmentDetail(res.data));
             //console.log(res.data);
-        }).catch(err => {
-            console.log(err);
-        })
+        }).catch((error) => {
+            toast.error(error.response.data.message.toUpperCase(), () => {
+            });
+        });
     }
 };
 
@@ -77,3 +108,14 @@ export const _getTodoListAssignment = (assignments) => ({
     type: GET_TODO_LIST_ASSIGNMENT,
     assignments
 })
+
+export const updateAnswerAssignment = (assignment) => {
+    return async (dispatch) => {
+        return await axios.put(API_URL + END_POINT_ASSIGNMENT + "/" + assignment.id + '/answer', assignment).then(res => {
+            toast.success('Send Answer Success!!', () => {})
+        }).catch((error) => {
+            toast.error(error.response.data.message.toUpperCase(), () => {
+            });
+        });
+    }
+}

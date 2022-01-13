@@ -1,5 +1,6 @@
 package com.thaithong.datn.controller;
 
+import com.thaithong.datn.enums.DifficultType;
 import com.thaithong.datn.model.AssignmentRequestModel;
 import com.thaithong.datn.service.AssignmentService;
 import com.thaithong.datn.utils.CustomErrorException;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -73,7 +76,7 @@ public class AssignmentController {
     }
 
     @GetMapping("/assignments/published")
-    public ResponseEntity<?> getAllPublishedAssignment () {
+    public ResponseEntity<?> getAllPublishedAssignment() {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(assignmentService.getAllPublishedAssignment());
         } catch (CustomErrorException customErrorException) {
@@ -82,11 +85,26 @@ public class AssignmentController {
     }
 
     @GetMapping("/assignments/todo")
-    public ResponseEntity<?> getAllTodoAssignment () {
+    public ResponseEntity<?> getAllTodoAssignment() {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(assignmentService.getAllTodoAssignment());
         } catch (CustomErrorException customErrorException) {
             return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
         }
     }
+
+    @GetMapping("/assignments/level")
+    public ResponseEntity<?> getDifficultLevel() {
+        return ResponseEntity.ok(Arrays.asList(DifficultType.values()));
+    }
+
+    @PutMapping("/assignments/{id}/answer")
+    public ResponseEntity<?> updateAnswerAssignment(@PathVariable Long id, @RequestBody AssignmentRequestModel requestModel) {
+        try {
+            return ResponseEntity.ok(assignmentService.updateAnswerAssignment(id, requestModel));
+        } catch (CustomErrorException customErrorException) {
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
+        }
+    }
+
 }

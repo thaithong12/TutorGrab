@@ -19,6 +19,7 @@ CKEditor.editorConfig = function (config) {
 };
 
 export default function NewAssignment() {
+
     const toast = ToastServive.new({
         place: 'topRight',
         duration: 5,
@@ -34,7 +35,8 @@ export default function NewAssignment() {
         subject: '',
         grade: '',
         content: '',
-        userId: ''
+        userId: '',
+        textContent: ''
     }
     const user = useSelector(state => state.user.user);
 
@@ -61,6 +63,12 @@ export default function NewAssignment() {
     // const handleChange = (event, newValue) => {
     //     setValue(newValue);
     // };
+    function stripHtml(html)
+    {
+        let tmp = document.createElement("DIV");
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || "";
+    }
 
     function handleSubmit(event) {
         event.preventDefault();
@@ -71,13 +79,13 @@ export default function NewAssignment() {
             });
             return;
         }
+        assignmentReq.textContent = stripHtml(assignmentReq.content);
+
         dispatch(createAssignment(assignmentReq)).then(res => {
             toast.success('Create assignment success!', () => {
             });
             setAssignment({...initAssState});
         });
-
-        setError({...initErr});
     }
 
     function validatedAssignment() {
@@ -138,8 +146,6 @@ export default function NewAssignment() {
                                             }
                                             <MenuItem value={'other'}>Other</MenuItem>
                                         </Select>
-
-
                                     </span>
                 </FormControl>
                 <FormControl style={{width: "100%"}}>
@@ -187,7 +193,7 @@ export default function NewAssignment() {
                                     </span>
                 </FormControl>
                 <div style={{padding: 30, marginLeft: "26%"}}>
-                    <Button variant="outlined" startIcon={<DeleteIcon/>}
+                    <Button style={{fill: "#1976d2"}} variant="outlined" startIcon={<DeleteIcon/>}
                             style={{marginRight: 10, width: "30%"}} onClick={resetAssignment}>
                         Delete
                     </Button>

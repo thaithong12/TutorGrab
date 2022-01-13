@@ -134,7 +134,7 @@ export default function Register() {
 
             fileData.append("multipartFile", event.target.files[0]);
 
-            axios.post(API_URL + '/upload', fileData, {
+            await axios.post(API_URL + '/upload', fileData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
