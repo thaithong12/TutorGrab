@@ -23,8 +23,14 @@ public class NotificationEntity extends BaseEntity {
     @Column(name = "sender_id")
     private Long senderId;
 
+    @Column(name = "sender_name")
+    private String senderName;
+
     @Column(name = "receiver_id")
     private Long receiverId;
+
+    @Column(name = "receiver_name")
+    private String receiverName;
 
     private String type;
 

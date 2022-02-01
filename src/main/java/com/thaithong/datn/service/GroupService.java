@@ -1,5 +1,6 @@
 package com.thaithong.datn.service;
 
+import com.mysql.cj.log.Log;
 import com.thaithong.datn.entity.GroupEntity;
 import com.thaithong.datn.model.GroupResponseModel;
 import com.thaithong.datn.model.MessageResponseModel;
@@ -14,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,7 +27,7 @@ public class GroupService {
     private AssignmentService assignmentService;
 
     public List<GroupResponseModel> getAllGroups(Long userId) {
-        var groups = groupRepository.findByUserId(userId);
+        var groups = groupRepository.findAllByUserIdOrderByUpdatedAtDesc(userId);
         var groupsResponseList = new ArrayList<GroupResponseModel>();
         if (!CollectionUtils.isEmpty(groups)) {
             groups.forEach(g -> groupsResponseList.add(convertEntityToResponseModel(g)));
@@ -49,6 +51,7 @@ public class GroupService {
         groupResponseModel.setIsClosed(groupEntity.getIsClosed());
 
         groupResponseModel.setAssignment(assignmentService.getAssignment(groupEntity.getAssignmentId()));
+        groupResponseModel.setUserId(groupEntity.getUserId());
 
         var users = groupEntity.getUsers().stream().map(
                 u -> {
@@ -57,10 +60,15 @@ public class GroupService {
                     user.setEmail(u.getEmail());
                     user.setName(u.getName());
                     user.setAvatar(u.getAvatar());
+                    var roles = u.getAccountRoles()
+                            .stream().map(i -> i.getRole().toString())
+                            .collect(Collectors.toList());
+                    user.setRoles(roles);
                     return user;
                 }
         ).collect(Collectors.toList());
         groupResponseModel.setUsers(users);
+        groupResponseModel.setUrl(groupEntity.getUrl());
 
         var msgs = groupEntity.getMessages().stream().map(
                 u -> {
@@ -79,5 +87,21 @@ public class GroupService {
         groupResponseModel.setMessages(msgs);
 
         return groupResponseModel;
+    }
+
+    public Long findGroupByUrl(String groupUrl) {
+        return groupRepository.findGroupByUrl(groupUrl);
+    }
+
+    public GroupEntity getGroupById (long id) {
+        return groupRepository.findById(id).get();
+    }
+
+    public String getGroupUrlById(Long id) {
+        return groupRepository.getGroupUrlById(id);
+    }
+
+    public Optional<GroupEntity> findById(Long groupId) {
+        return groupRepository.findById(groupId);
     }
 }

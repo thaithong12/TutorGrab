@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {Link} from "react-router-dom";
 import ScriptTag from "react-script-tag";
 import {Helmet} from "react-helmet";
@@ -6,6 +6,7 @@ import TextField from "@material-ui/core/TextField";
 import {useDispatch, useSelector} from "react-redux";
 import {login} from "../../../../Actions/authAction";
 import {history} from "../../../../Helper/history";
+import Modal, {closeStyle} from 'simple-react-modal'
 
 export default function Login() {
     const dispatch = useDispatch();
@@ -15,13 +16,13 @@ export default function Login() {
         password: '',
     });
 
+    const [isLoading, setIsLoading] = useState(false);
+
     function handleChange(event) {
         setValues({...values, [event.target.name]: event.target.value});
     };
 
     let user = useSelector(state => state.user.user);
-
-    console.log(user);
 
     useEffect(() => {
         if (user && user.loggedIn) {
@@ -32,13 +33,28 @@ export default function Login() {
         }
     }, [user]);
 
+    let i = 0;
+
     function handleSubmitLogin(e) {
         e.preventDefault();
-        dispatch(login(values));
+        setIsLoading(true);
+        dispatch(login(values)).then(() => {
+            setIsLoading(false);
+        });
     }
 
     return (
         <div>
+            <Modal
+                className="test-class" //this will completely overwrite the default css completely
+                style={{background: 'red', position: 'fixed'}} //overwrites the default background
+                containerStyle={{background: '#f8f8f8'}} //changes styling on the inner content area
+                containerClassName="test"
+                closeOnOuterClick={true}
+                show={isLoading}
+                onClose={() => setIsLoading(false)}>
+                <div className={'loader'}></div>
+            </Modal>
             <Helmet>
                 <link rel="stylesheet" href="/css/style.scoped.css"/>
                 <link rel="stylesheet" href="/css/material-icon/css/material-design-iconic-font.scoped.min.css"/>

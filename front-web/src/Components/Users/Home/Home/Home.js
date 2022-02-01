@@ -33,7 +33,7 @@ export default function Home() {
             }).catch(err => {
                 console.log(err);
             })
-            //await dispatch(publishedAssignment());
+
             await axios.get(API_URL + END_POINT_PUBLISHED_ASSIGNMENT).then(res => {
                 dispatch(_publishedAssignment(res.data));
                 setPublishedList([...res.data])

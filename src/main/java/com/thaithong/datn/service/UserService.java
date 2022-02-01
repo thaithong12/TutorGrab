@@ -4,17 +4,19 @@ import com.thaithong.datn.entity.RoleEntity;
 import com.thaithong.datn.entity.UserAssignment;
 import com.thaithong.datn.entity.UserEntity;
 import com.thaithong.datn.enums.AccountRole;
-import com.thaithong.datn.model.CKFileResponse;
-import com.thaithong.datn.model.UserAssignmentResponseModel;
-import com.thaithong.datn.model.UserRequestModel;
-import com.thaithong.datn.model.UserResponseModel;
+import com.thaithong.datn.enums.MessageType;
+import com.thaithong.datn.enums.TransportAction;
+import com.thaithong.datn.model.*;
 import com.thaithong.datn.repository.UserAssignmentRepository;
 import com.thaithong.datn.repository.UserRepository;
 import com.thaithong.datn.utils.CustomErrorException;
 import com.thaithong.datn.utils.ErrorObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -26,9 +28,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -46,6 +46,23 @@ public class UserService {
 
     @Autowired
     ServletContext context;
+
+    @Autowired
+    private GroupService groupService;
+
+    @Autowired
+    private MessageService messageService;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    private static Logger log = LoggerFactory.getLogger(UserService.class);
+
+    private Map<Integer, String> wsSessions = new HashMap<>();
+
+    public Map<Integer, String> getWsSessions() {
+        return wsSessions;
+    }
 
     public void saveUser(UserEntity u) {
         userRepository.save(u);
@@ -272,5 +289,41 @@ public class UserService {
             return new ResponseEntity<>(HttpStatus.PAYLOAD_TOO_LARGE);
         }
         return ResponseEntity.ok(ckFile);
+    }
+
+    public String findUsernameWithWsToken(String jwtToken) {
+        return userRepository.getUsernameWithWsToken(jwtToken);
+    }
+
+    public int findUserIdWithToken(String jwtToken) {
+        return userRepository.getUserIdWithWsToken(jwtToken);
+    }
+
+    public ResponseEntity<?> processingImageOnMessage(MultipartFile[] multipartFile, Long userId, String groupUrl) {
+        Long groupId = groupService.findGroupByUrl(groupUrl);
+        try {
+            var messageEntity = messageService
+                    .createAndSaveMessage(userId, groupId, MessageType.FILE.toString(), "has send a file");
+            //storageService.store(file, messageEntity.getId());
+            List<String> arrayImg = (List<String>) processingImage(multipartFile).getBody();
+            messageEntity.setFile(arrayImg.get(0));
+            messageService.updateMessage(messageEntity);
+
+            OutputTransport res = new OutputTransport();
+            NotificationResponseModel notificationDTO = messageService.createNotificationDTO(messageEntity);
+            res.setAction(TransportAction.NOTIFICATION_MESSAGE);
+            res.setObject(notificationDTO);
+            //seenMessageService.saveMessageNotSeen(messageEntity, groupId);
+            var toSend = messageService.createNotificationList(userId, groupUrl);
+            toSend.forEach(toUserId -> messagingTemplate.convertAndSend("/topic/user/" + toUserId, res));
+        } catch (Exception e) {
+            log.error("Cannot save file, caused by {}", e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    public String findFirstNameById(Long id) {
+        return userRepository.getNameByUserId(id);
     }
 }

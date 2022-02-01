@@ -29,4 +29,6 @@ public class GroupResponseModel {
     private List<MessageResponseModel> messages;
 
     private Boolean isClosed;
+
+    private String url;
 }

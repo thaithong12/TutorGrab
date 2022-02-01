@@ -199,7 +199,7 @@ public class AuthService {
                     sendEmailWithToken(ac.getEmail(), ac.getToken(), "Re-Send Token!");
                     return ResponseEntity.status(HttpStatus.OK).body(new ErrorObject("200", "Re-Send Token"));
                 } else {
-                    ac.setToken(null);
+                    //ac.setToken(null);
                     ac.setIsActivated(true);
                 }
                 userService.saveUser(ac);

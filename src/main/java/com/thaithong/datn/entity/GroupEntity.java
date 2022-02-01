@@ -29,6 +29,8 @@ public class GroupEntity extends BaseEntity {
 
     private String name;
 
+    private String url;
+
     /**
      * administratorId
      */

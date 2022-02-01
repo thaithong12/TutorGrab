@@ -2,13 +2,20 @@ package com.thaithong.datn.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.Date;
 import java.util.List;
 
@@ -20,7 +27,7 @@ import java.util.List;
 @Getter
 @Setter
 public class UserEntity extends BaseEntity {
-    @Column(unique=true)
+    @Column(unique = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String email;
 
@@ -34,13 +41,14 @@ public class UserEntity extends BaseEntity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String phoneNumber;
 
+    //@Column(name = "wstoken")
     private String token;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String avatar;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @Column(columnDefinition="LONGTEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String jwt;
 
     /**

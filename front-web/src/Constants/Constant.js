@@ -3,6 +3,7 @@ export const API_URL = 'http://localhost/api';
 
 export const LOGIN_ACCOUNT = 'LOGIN_ACCOUNT';
 export const LOGOUT_ACCOUNT = 'LOGOUT_ACCOUNT';
+export const FETCH_ACCOUNT = 'FETCH_ACCOUNT';
 export const ORDERS_GET = 'GET'
 
 export const END_POINT_LOGIN = '/auth/login';
@@ -28,3 +29,15 @@ export const GET_TODO_LIST_ASSIGNMENT = "GET_TODO_LIST_ASSIGNMENTS"
 export const END_POINT_TODO_LIST_ASSIGNMENT = END_POINT_ASSIGNMENT + "/todo"
 
 export const END_POINT_REQUEST_SOLVE_ASSIGNMENT = "/requests"
+
+export const END_POINT_WS = "////localhost/messenger"
+
+export const INIT_WS_TOKEN = "INIT_WS_TOKEN";
+
+export const INIT_WS_CONNECTION = "INIT_WS_CONNECTION";
+
+export const SET_WS_GROUPS = "SET_WS_GROUPS";
+
+export const WS_CHECK_CONNECTED = "WS_CHECK_CONNECTED";
+
+export const END_POINT_FETCH_ALL_GROUP = "/groups/user/";

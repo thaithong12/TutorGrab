@@ -8,6 +8,7 @@ import axios from 'axios'
 import {API_URL} from "../../../../Constants/Constant";
 import {history} from "../../../../Helper/history";
 import Progress from 'react-progressbar';
+import Modal from "simple-react-modal";
 
 export default function Register() {
     const toast = ToastServive.new({
@@ -32,6 +33,8 @@ export default function Register() {
         isErr: false,
         msg: ''
     })
+
+    const [isLoading, setIsLoading] = useState(false);
 
     function validation() {
         return new Promise(resolve => {
@@ -91,12 +94,15 @@ export default function Register() {
 
     async function handleSubmitForm(event) {
         event.preventDefault();
+        setIsLoading(true);
         await validation().then(relsove => {
             if (relsove) {
                 toast.error(err.msg.toUpperCase(), () => {
                 });
+                setIsLoading(false);
                 return;
             } else {
+
                 axios.post(API_URL + '/auth/register', userRegister, {
                     headers: {
                         'Content-Type': 'application/json'
@@ -105,9 +111,15 @@ export default function Register() {
                     history.push('/sign-in');
                     toast.success('Email has been send, pls check it & active account', () => {
                     });
+                    setIsLoading(false);
                 }).catch(error => {
-                    toast.error(error.response.data.message.toUpperCase(), () => {
-                    });
+                    if (error.response) {
+                        toast.error(error.response.data.message.toUpperCase(), () => {
+                        });
+                    } else {
+                        console.log(error);
+                    }
+                    setIsLoading(false);
                 })
             }
         });
@@ -150,6 +162,16 @@ export default function Register() {
 
     return (
         <div>
+            <Modal
+                className="test-class" //this will completely overwrite the default css completely
+                style={{background: 'red', position: 'fixed'}} //overwrites the default background
+                containerStyle={{background: '#f8f8f8'}} //changes styling on the inner content area
+                containerClassName="test"
+                closeOnOuterClick={true}
+                show={isLoading}
+                onClose={() => setIsLoading(false)}>
+                <div className={'loader'}></div>
+            </Modal>
             <Helmet>
                 <link rel="stylesheet" href="/css/style.scoped.css"/>
                 <link rel="stylesheet" href="/css/material-icon/css/material-design-iconic-font.scoped.min.css"/>

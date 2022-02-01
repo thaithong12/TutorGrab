@@ -27,8 +27,7 @@ export default function Header() {
             await axios.post(API_URL + END_POINT_FETCH_USER, data).then(res => {
                 if (res.data) {
                     setUser({...res.data, loggedIn: true})
-                } else {
-                    setUser({...initUser, loggedIn: false})
+                } else if (!localStorage.getItem("Authorization")) {
                     history.push('/sign-in');
                 }
                 console.log(res.data)

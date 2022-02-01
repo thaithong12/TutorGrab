@@ -26,4 +26,10 @@ public class FileEntity extends BaseEntity {
     private String fileName;
 
     private String url;
+
+    @Column(name = "group_id")
+    private Long groupId;
+
+    @Column(name = "userId")
+    private Long userId;
 }
