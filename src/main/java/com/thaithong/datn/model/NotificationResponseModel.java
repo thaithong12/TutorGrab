@@ -11,27 +11,17 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NotificationResponseModel {
+    private Long notificationId;
+
     private Long senderId;
 
     private String senderName;
-
-    private Long receiverId;
-
-    private String receiverName;
 
     private MessageType type;
 
     private String message;
 
-    private String lastMessageDate;
-
-    private String groupUrl;
-
     private Long groupId;
-
-    private String fileUrl;
-
-    private String fileName;
 
     private boolean isMessageSeen;
 

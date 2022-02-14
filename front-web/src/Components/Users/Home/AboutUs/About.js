@@ -2,6 +2,7 @@ import React from "react";
 import Header from "../Header";
 import HomeScript from "../HomeScript";
 import Footer from "../Footer";
+import ChatHome from "../../OnlineChat/ChatHome";
 
 export default function AboutUs() {
     return (
@@ -105,6 +106,7 @@ export default function AboutUs() {
                     </div>
                 </div>
             </div>
+            <ChatHome />
             <HomeScript/>
             <Footer/>
         </div>

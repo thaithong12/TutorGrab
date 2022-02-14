@@ -62,5 +62,7 @@ public class AssignmentResponseModel {
 
     private String answer;
 
+    private String assignmentUrl;
+
     private SubjectResponseModel subject;
 }

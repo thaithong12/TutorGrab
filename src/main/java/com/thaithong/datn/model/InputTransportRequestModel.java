@@ -1,5 +1,6 @@
 package com.thaithong.datn.model;
 
+import com.thaithong.datn.enums.MessageType;
 import com.thaithong.datn.enums.TransportAction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,4 +23,14 @@ public class InputTransportRequestModel {
     private String message;
 
     private int messageId;
+
+    private Long senderId;
+
+    private Long receiverId;
+
+    private Long groupId;
+
+    private String type;
+
+    private String fileName;
 }

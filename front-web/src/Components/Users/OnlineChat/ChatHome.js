@@ -2,64 +2,48 @@ import React, {useEffect, useState} from "react";
 import ChatBubbleOutlinedIcon from '@mui/icons-material/ChatBubbleOutlined';
 import {Button} from "@mui/material";
 import {useDispatch, useSelector} from "react-redux";
-import {API_URL, END_POINT_FETCH_ALL_GROUP, END_POINT_WS} from "../../../Constants/Constant";
+import {API_URL, END_POINT_FETCH_ALL_GROUP, END_POINT_WS, SEND_GROUP_MESSAGE} from "../../../Constants/Constant";
 import {_wsFetchAllSortedGroup, initWsConnection, wsHealthCheckConnected} from "../../../Actions/wsAction";
 import {axios} from "../../../Interceptor";
+import {toast} from "../../../Actions/assignmentAction";
 
 export default function ChatHome() {
     let [openChat, setOpen] = useState(false);
-    let hasBeenCalled = useSelector(state => state.wsInfo.isWsConnected | false);
+    let hasBeenCalled = useSelector(state => state.wsInfo.isWsConnected || false);
     let stompClient = useSelector(state => state.wsInfo.wsObject);
     let groups = useSelector(state => state.wsInfo.wsUserGroups);
     const user = useSelector(state => state.user.user);
-
     const dispatch = useDispatch();
 
     let [currentData, setCurrentData] = useState({
         groupList: [],
         messages: [],
         users: [],
-        currentGroup: null,
-        currentUrl: ''
-    })
+        currentGroup: {
+            isClosed: false
+        },
+        currentUrl: '',
+        otherUsers: []
+    });
 
-    let [msgData, setMsg] = useState({
-        sender: '',
-        to: '',
-        messageType: '',
-        file: null,
+    let initStateMsg = {
+        userId: '',
+        action: '',
+        wsToken: '',
+        groupUrl: '',
         message: '',
-        isError: false,
-        msgError: ''
-    })
-
-    useEffect(() => {
-        onConnect();
-        fetchData();
-        scrollToBottom();
-    }, [])
-
-    function handleOpenChat(event) {
-        event.preventDefault();
-        setOpen(!openChat);
+        senderId: '',
+        receiverId: '',
+        groupId: '',
+        type: '',
+        fileName: ''
     }
+    let [msgData, setMsg] = useState({...initStateMsg})
+    let [subscribeWs, setSubscribe] = useState([]);
+    let [isSubscribe, setIsSubscribe] = useState(false);
 
-    async function fetchData() {
-        if (user) {
-            return await axios.get(API_URL + END_POINT_FETCH_ALL_GROUP + user.id).then(res => {
-                dispatch(_wsFetchAllSortedGroup([...res.data]));
-                setCurrentData({
-                    ...currentData, currentGroup: res.data[0],
-                    groupList: res.data, messages: res.data[0].messages,
-                    users: res.data[0].users
-                })
-            }).catch(err => {
-                console.log(err);
-            })
-        }
-    }
-
-    function onConnect() {
+    async function onConnect() {
+        console.log('Goi connect')
         if (!hasBeenCalled) {
             const Stomp = require('stompjs')
 
@@ -71,24 +55,80 @@ export default function ChatHome() {
 
             stompClient = Stomp.over(SockJS);
 
-            stompClient.connect({}, onConnected(), onError());
+            stompClient.connect({}, onConnected, onError);
 
             dispatch(initWsConnection(stompClient));
         }
     }
 
-    function onConnected() {
-        console.log('Connected!');
-        dispatch(wsHealthCheckConnected(true));
-        //setHasBeenCalled(true);
-        // Subscribing to the private topic
-        //stompClient.subscribe('/user/' + this.props.otherUser.toString().toLowerCase() + '/reply', this.onMessageReceived);
+    useEffect(() => {
+        async function fetchData() {
+            console.log('Fetch data');
+            if (user) {
+                return await axios.get(API_URL + END_POINT_FETCH_ALL_GROUP + user.id).then(res => {
+                    dispatch(_wsFetchAllSortedGroup([...res.data]));
+                    let usersTemp = [];
+                    for (let grp of res.data) {
+                        Array.prototype.push.apply(usersTemp, grp.users);
+                    }
+                    setCurrentData({
+                        ...currentData, currentGroup: res.data[0],
+                        groupList: res.data, messages: res.data[0].messages,
+                        users: res.data[0].users,
+                        otherUsers: usersTemp,
+                        currentUrl: res.data[0].url
+                    });
+                    /*if (stompClient && stompClient.connected) {
+                        onSubscribe(res.data);
+                        setIsSubscribe(true);
+                    }*/
+                    onConnect();
+                }).catch(err => {
+                    console.log(err);
+                })
+            }
+        }
 
-        // Registering user to server as a private chat user
-        //stompClient.send('/app/addPrivateUser', {}, JSON.stringify({ sender: this.props.otherUser, type: 'JOIN' }))
+        fetchData();
+
+        scrollToBottom();
+
+        return () => onUnSubscribe();
+    }, [])
+
+    useEffect(() => {
+        scrollToBottom();
+        // return () => onUnSubscribe();
+    }, [isSubscribe, currentData, msgData, subscribeWs])
+
+    useEffect(() => {
+        return () => {
+            if (subscribeWs && subscribeWs.length > 0 && stompClient) {
+                for (let elm of subscribeWs) {
+                    elm.unsubscribe();
+                }
+            }
+        };
+    }, [subscribeWs])
+
+    function handleOpenChat(event) {
+        event.preventDefault();
+        console.log(isSubscribe)
+        if (isSubscribe === false) {
+            setIsSubscribe(true);
+            onSubscribe(currentData.groupList);
+        }
+        setOpen(!openChat);
     }
 
-    function onError() {
+    let onConnected = () => {
+        console.log('Connected!');
+        dispatch(wsHealthCheckConnected(true));
+        onSubscribe(currentData.groupList);
+        //fetchData();
+    }
+
+    let onError = () => {
         setMsg({...msgData, isError: true, msgError: 'Other Error'});
         console.log('Cannot connect to Server!');
     }
@@ -100,7 +140,16 @@ export default function ChatHome() {
 
     function handleChangeMsg(event) {
         event.preventDefault();
-        setMsg({...msgData, message: event.target.value, messageType: "TEXT"});
+        setMsg({
+            ...msgData,
+            message: event.target.value,
+            groupId: currentData.currentGroup.id,
+            type: 'TEXT',
+            action: SEND_GROUP_MESSAGE,
+            groupUrl: currentData.currentGroup.url,
+            senderId: user.id,
+            receiverId: currentData.currentGroup.users.find(i => i.id !== user.id).id
+        });
     }
 
     function handleSubmitMsg(event) {
@@ -109,36 +158,132 @@ export default function ChatHome() {
             // send public message
             stompClient.send("/app/message", {}, JSON.stringify(msgData));
         }
+        setMsg({...initStateMsg});
     }
 
     function getUserName(userId) {
-        if (currentData.users && currentData.users.length > 0) {
-            return currentData.users.find(i => i.id === userId).name;
+        if (currentData.otherUsers && currentData.otherUsers.length > 0) {
+            let obj = currentData.otherUsers.find(i => i.id === userId);
+            return obj ? obj.name : '';
         }
     }
 
-    function handleChangeConversation(groupId) {
+    async function handleChangeConversation(groupId) {
         //if (groupId == currentData.currentGroup.id)
-            //return;
-        let group = currentData.groupList.find(i => i.id == groupId);
+        //return;
+        let group = currentData.groupList.find(i => i.id === groupId);
         if (group) {
-            setCurrentData({
+            await setCurrentData({
                 ...currentData,
                 currentGroup: group,
                 messages: group.messages,
                 currentUrl: group.url,
                 users: group.users
-            })
+            });
+            let cloneGroup = {...group};
+            delete cloneGroup.messages;
+            delete cloneGroup.users;
+            localStorage.setItem("curGroup", JSON.stringify({url: group.url, curGroup: {...group}}));
         }
+        console.log(currentData);
+    }
+
+    let onSubscribe = (groupList) => {
+        let arr = []
+        if (groupList && groupList.length > 0 && stompClient) {
+            for (let gr of groupList) {
+                let sub = stompClient.subscribe('/user/' + gr.url + '/reply', onMessageReceived);
+                arr.push(sub);
+            }
+            setSubscribe([...arr]);
+        }
+    }
+
+    let onUnSubscribe = () => {
+        console.log(subscribeWs);
+        /*
+        if (subscribeWs && subscribeWs.length > 0 && stompClient) {
+            for (let elm of subscribeWs) {
+                elm.unsubscribe();
+            }
+        }
+         */
+    };
+
+    let onMessageReceived = (payload) => {
+        console.log({...currentData})
+        //debugger;
+
+        let lastMsgObj = JSON.parse(payload.body);
+        let updateCurrentGroup = JSON.parse(localStorage.getItem("curGroup"));
+        let group = {...currentData.groupList.find(i => i.id === lastMsgObj.groupId)};
+        if (group) {
+            let isDuplicatedMsg = group.messages.find(msg => msg.id === lastMsgObj.id);
+            if (!isDuplicatedMsg) {
+                group.messages.push(lastMsgObj);
+
+                let newGroupList = [...currentData.groupList];
+                newGroupList.map(obj => {
+                    if (obj.id === group.id)
+                        return group
+                    else return obj
+                });
+
+                setCurrentData({...currentData, groupList: newGroupList});
+                if (updateCurrentGroup && updateCurrentGroup.curGroup.id === group.id) {
+                    setCurrentData({
+                        ...currentData,
+                        messages: group.messages,
+                        currentUrl: group.url,
+                        currentGroup: group
+                    });
+                }
+            }
+
+            console.log(currentData);
+        } else {
+            console.log("error roi");
+        }
+        scrollToBottom();
     }
 
     // trash function
     function a(index) {
-        if (index > 0)
+        if (index > 0) {
+            // console.log('Scroll');
             scrollToBottom();
+        }
     }
 
-    console.log(currentData)
+    async function handleUploadFile(event) {
+        event.preventDefault();
+        if (event.target.files[0] && event.target.files[0].size > 10e6) {
+            toast.error('File size cannot greater then 5MB', () => {
+            });
+            event.target.value = null;
+        } else {
+            const fileData = new FormData();
+
+            fileData.append("multipartFile", event.target.files[0]);
+
+            await axios.post(API_URL + '/upload', fileData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then(result => {
+                console.log(result.data[0]);
+                let fileNameRs = result.data[0];
+                setMsg({...msgData, fileName: fileNameRs});
+                //event.target.value = null;
+            }).catch(error => {
+                console.log(error);
+            })
+        }
+    }
+
+    let handlePreviewImg = (fileName) => {
+        window.open('http://localhost:3000/image/' + fileName, '_blank').focus();
+    }
 
     return (
         <div className={''}>
@@ -159,7 +304,7 @@ export default function ChatHome() {
                                             groups.map((g) => {
                                                 return (
                                                     <div style={{padding: 2, border: '1px solid white', marginTop: 2}}
-                                                    onClick={() => handleChangeConversation(g.id)}>
+                                                         onClick={() => handleChangeConversation(g.id)}>
                                                         <div className='chatbox__user--active'>
                                                             <p title={'Thong test'}>{g.assignment.subject.name + ' - '}
                                                                 {g.assignment.grade}</p>
@@ -184,6 +329,18 @@ export default function ChatHome() {
                                                     <div className="chatbox__messages__user-message">
                                                         <div
                                                             className={user.id !== row.senderId ? "chatbox-content-left" : "chatbox-content-right"}>
+                                                            {row.type && row.type === 'IMAGE' ?
+                                                                <a>
+                                                                    <img
+                                                                        onClick={(e) => {
+                                                                            e.preventDefault();
+                                                                            handlePreviewImg(row.fileName)
+                                                                        }}
+                                                                        width={200} height={189}
+                                                                        src={'http://localhost:3000/image/' + row.fileName}
+                                                                        alt={'image-msg'}/>
+                                                                </a> : ''
+                                                            }
                                                             <p className="name">{row.text}</p>
                                                             <br/>
                                                             <p className="message">
@@ -200,12 +357,44 @@ export default function ChatHome() {
                                     </div>
                                 </div>
                                 <form onSubmit={handleSubmitMsg}>
-                                    <input type="text" placeholder="Enter your message" onChange={handleChangeMsg}/>
-                                    <input style={{
-                                        marginLeft: '76%',
-                                        backgroundColor: 'cornflowerblue',
-                                        width: 78
-                                    }} type={"submit"} value={'Send'}/>
+                                    <input disabled={currentData.currentGroup.isClosed} type="text"
+                                           placeholder="Enter your message" onChange={handleChangeMsg}
+                                           value={msgData.message}/>
+                                    <input
+                                        disabled={currentData.currentGroup.isClosed}
+                                        style={{
+                                            marginLeft: '76%',
+                                            backgroundColor: 'cornflowerblue',
+                                            width: 78
+                                        }} type={"submit"} value={'Send'}/>
+
+                                    {msgData.fileName !== '' ?
+                                        <span style={{
+                                            position: "absolute",
+                                            bottom: '9%',
+                                            right: '26%',
+                                            color: 'white'
+                                        }}>(1 file is choose)</span> : ''}
+                                    <Button
+                                        variant="contained"
+                                        component="label"
+                                        style={{
+                                            fontSize: 11,
+                                            backgroundColor: 'cornflowerblue',
+                                            width: '78',
+                                            position: 'absolute',
+                                            right: '29%',
+                                            bottom: '3%'
+                                        }}
+                                    >
+                                        File
+                                        <input
+                                            accept="image/*"
+                                            type="file"
+                                            hidden
+                                            onChange={handleUploadFile}
+                                        />
+                                    </Button>
                                 </form>
 
                             </div>

@@ -42,6 +42,14 @@ public class UserResponseModel {
 
     private Boolean isAuthorized;
 
+    private String identification;
+
+    private String studentCard;
+
+    private String collegeDegree;
+
+    private Date createdAt;
+
     private Boolean isBlocked;
 
     private List<String> roles;

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Link} from "react-router-dom";
 import ScriptTag from "react-script-tag";
 import {Helmet} from "react-helmet";
@@ -6,7 +6,7 @@ import TextField from "@material-ui/core/TextField";
 import {useDispatch, useSelector} from "react-redux";
 import {login} from "../../../../Actions/authAction";
 import {history} from "../../../../Helper/history";
-import Modal, {closeStyle} from 'simple-react-modal'
+import Modal from 'simple-react-modal'
 
 export default function Login() {
     const dispatch = useDispatch();
@@ -32,8 +32,6 @@ export default function Login() {
             })
         }
     }, [user]);
-
-    let i = 0;
 
     function handleSubmitLogin(e) {
         e.preventDefault();
@@ -99,11 +97,11 @@ export default function Login() {
                                 <div className="social-login">
                                     <span className="social-label">Or login with</span>
                                     <ul className="socials">
-                                        <li><a href="#"><i className="display-flex-center zmdi zmdi-facebook"></i></a>
+                                        <li><a href="#123"><i className="display-flex-center zmdi zmdi-facebook"></i></a>
                                         </li>
-                                        <li><a href="#"><i className="display-flex-center zmdi zmdi-twitter"></i></a>
+                                        <li><a href="#123"><i className="display-flex-center zmdi zmdi-twitter"></i></a>
                                         </li>
-                                        <li><a href="#"><i className="display-flex-center zmdi zmdi-google"></i></a>
+                                        <li><a href="#123"><i className="display-flex-center zmdi zmdi-google"></i></a>
                                         </li>
                                     </ul>
                                 </div>

@@ -1,7 +1,7 @@
 package com.thaithong.datn.service;
 
-import com.mysql.cj.log.Log;
 import com.thaithong.datn.entity.GroupEntity;
+import com.thaithong.datn.entity.MessageEntity;
 import com.thaithong.datn.model.GroupResponseModel;
 import com.thaithong.datn.model.MessageResponseModel;
 import com.thaithong.datn.model.UserResponseModel;
@@ -35,10 +35,10 @@ public class GroupService {
         return groupsResponseList;
     }
 
-    public GroupResponseModel getGroup (Long idGroup) {
+    public GroupResponseModel getGroup(Long idGroup) {
         var group = groupRepository.findById(idGroup);
         if (group.isEmpty()) {
-            throw new CustomErrorException(HttpStatus.NOT_FOUND, new ErrorObject("E404001", "Group Not found with id = "+ idGroup));
+            throw new CustomErrorException(HttpStatus.NOT_FOUND, new ErrorObject("E404001", "Group Not found with id = " + idGroup));
         }
         return convertEntityToResponseModel(group.get());
     }
@@ -70,30 +70,34 @@ public class GroupService {
         groupResponseModel.setUsers(users);
         groupResponseModel.setUrl(groupEntity.getUrl());
 
-        var msgs = groupEntity.getMessages().stream().map(
-                u -> {
-                    var msg = new MessageResponseModel();
-                    msg.setId(u.getId());
-                    msg.setReceiverId(u.getReceiverId());
-                    msg.setSenderId(u.getSenderId());
-                    msg.setCreatedAt(u.getCreatedAt());
-                    msg.setUpdatedAt(u.getUpdatedAt());
-                    msg.setType(u.getType());
-                    msg.setText(u.getText());
-                    msg.setFile(u.getFile());
-                    return msg;
-                }
-        ).collect(Collectors.toList());
+        List<MessageResponseModel> msgs;
+        msgs = groupEntity.getMessages().stream()
+                .map(u -> convertMessageEntityToModel(u))
+                .collect(Collectors.toList());
         groupResponseModel.setMessages(msgs);
 
         return groupResponseModel;
+    }
+
+    public MessageResponseModel convertMessageEntityToModel(MessageEntity u) {
+        var msg = new MessageResponseModel();
+        msg.setId(u.getId());
+        msg.setReceiverId(u.getReceiverId());
+        msg.setSenderId(u.getSenderId());
+        msg.setCreatedAt(u.getCreatedAt());
+        msg.setUpdatedAt(u.getUpdatedAt());
+        msg.setType(u.getType());
+        msg.setText(u.getText());
+        msg.setFileName(u.getFile());
+        msg.setGroupId(u.getGroup().getId());
+        return msg;
     }
 
     public Long findGroupByUrl(String groupUrl) {
         return groupRepository.findGroupByUrl(groupUrl);
     }
 
-    public GroupEntity getGroupById (long id) {
+    public GroupEntity getGroupById(long id) {
         return groupRepository.findById(id).get();
     }
 

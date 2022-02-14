@@ -21,6 +21,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    @GetMapping("/users/teachers")
+    private ResponseEntity<?> getAllTeacherUsers() {
+        return ResponseEntity.ok(userService.getAllTeacherUsers());
+    }
+
     @GetMapping("/users/is-blocked")
     private ResponseEntity<?> getAllUsersIsBlocked() {
         return ResponseEntity.ok(userService.findByIsBlocked(true));
@@ -85,5 +90,15 @@ public class UserController {
     @PostMapping("/upload-ckeditor")
     public ResponseEntity<?> uploadFileCKEditor (@RequestBody MultipartFile[] files) {
         return userService.processingImageCKEditor(files);
+    }
+
+    @PutMapping("/users/authorized-user")
+    private ResponseEntity<?> updateAuthorizedUser(@RequestBody UserRequestModel requestModel) {
+        try {
+            userService.updateAuthorizedUser(requestModel);
+            return ResponseEntity.ok(userService.getUserInfo(requestModel.getUserId()));
+        } catch (CustomErrorException customErrorException) {
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
+        }
     }
 }

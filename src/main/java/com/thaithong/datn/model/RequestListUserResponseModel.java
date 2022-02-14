@@ -19,4 +19,10 @@ public class RequestListUserResponseModel {
     private Long responseId;
 
     private Boolean isAccepted;
+
+    private String assignmentUrl;
+
+    private String difficultType;
+
+    private Double price;
 }

@@ -151,6 +151,11 @@ public class UserService {
         userResponse.setIsActivated(userEntity.getIsActivated());
         userResponse.setIsAuthorized(userEntity.getIsAuthorized());
         userResponse.setIsBlocked(userEntity.getIsBlocked());
+        userResponse.setCreatedAt(userEntity.getCreatedAt());
+
+        userResponse.setIdentification(userEntity.getIdentification());
+        userResponse.setStudentCard(userEntity.getStudentCard());
+        userResponse.setCollegeDegree(userEntity.getCollegeDegree());
 
         var roles = userEntity.getAccountRoles();
         var rolesResponse = new ArrayList<String>();
@@ -302,6 +307,7 @@ public class UserService {
     public ResponseEntity<?> processingImageOnMessage(MultipartFile[] multipartFile, Long userId, String groupUrl) {
         Long groupId = groupService.findGroupByUrl(groupUrl);
         try {
+            /*
             var messageEntity = messageService
                     .createAndSaveMessage(userId, groupId, MessageType.FILE.toString(), "has send a file");
             //storageService.store(file, messageEntity.getId());
@@ -316,6 +322,7 @@ public class UserService {
             //seenMessageService.saveMessageNotSeen(messageEntity, groupId);
             var toSend = messageService.createNotificationList(userId, groupUrl);
             toSend.forEach(toUserId -> messagingTemplate.convertAndSend("/topic/user/" + toUserId, res));
+             */
         } catch (Exception e) {
             log.error("Cannot save file, caused by {}", e.getMessage());
             return ResponseEntity.status(500).build();
@@ -325,5 +332,23 @@ public class UserService {
 
     public String findFirstNameById(Long id) {
         return userRepository.getNameByUserId(id);
+    }
+
+    public List<UserResponseModel> getAllTeacherUsers () {
+        var listUser = userRepository.findByAccountRoles_Role(AccountRole.ROLE_TEACHER);
+        var listReturn = new ArrayList<UserResponseModel>();
+        if (!CollectionUtils.isEmpty(listUser)) {
+            listUser.forEach(item -> listReturn.add(convertEntityToResponseModel(item)));
+        }
+        return listReturn;
+    }
+
+    public void updateAuthorizedUser(UserRequestModel requestModel) {
+        var user = userRepository.findById(requestModel.getUserId());
+        if (user.isEmpty()) {
+            throwNotFoundException(requestModel.getUserId(), user);
+        }
+        user.get().setIsAuthorized(requestModel.getIsAuthorized());
+        userRepository.save(user.get());
     }
 }

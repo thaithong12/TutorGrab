@@ -57,7 +57,7 @@ export default function SingleAssignment() {
 
     let [difficultTypeState, setDifficult] = useState('VERY_EASY');
 
-    let [answer , setAnswer] = useState('');
+    let [answer, setAnswer] = useState('');
 
     const options = {
         weekday: 'long',
@@ -171,10 +171,11 @@ export default function SingleAssignment() {
         window.location.reload();
     }
 
-    async function handleSendAnswer (event) {
+    async function handleSendAnswer(event) {
         event.preventDefault();
         if (answer == '') {
-            toast.error("Answer must not be null!!", () => {});
+            toast.error("Answer must not be null!!", () => {
+            });
             return;
         }
         assignmentReq.answer = answer;
@@ -182,7 +183,7 @@ export default function SingleAssignment() {
         await fetchData();
     }
 
-    function changeDifficultType (event) {
+    function changeDifficultType(event) {
         setDifficult(event.target.value)
     }
 
@@ -210,9 +211,13 @@ export default function SingleAssignment() {
         }
     }
 
+    console.log(assignment)
+    console.log(assignment.requestId == user.id || assignment.isPublished
+        || assignment.responseId == user.id || assignment.isRejected || !assignment.responseId || !assignment.isAnswered)
+
     return (
         assignment && (assignment.requestId == user.id || assignment.isPublished
-            || assignment.responseId == user.id || assignment.isRejected || !assignment.responseId) ?
+            || assignment.responseId == user.id || assignment.isRejected || !assignment.responseId || !assignment.isAnswered) ?
             (<div>
                 <div className={'site-wrap'} id={'home-section'}>
                     <Header/>
@@ -350,13 +355,14 @@ export default function SingleAssignment() {
                                 <div style={{textAlign: "center", padding: 5}}>
                                     <strong>Solved: </strong>
                                     <a href={"http://localhost:3000/image/" + assignment.answer}>
-                                        <img width={400} height={200} src={"http://localhost:3000/image/" + assignment.answer}
+                                        <img width={400} height={200}
+                                             src={"http://localhost:3000/image/" + assignment.answer}
                                              tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_1_horizontal.jpg.pagespeed.ic.V8yJdSbNBp.jpg"
                                              alt="Image" className="img-fluid"/>
                                     </a>
                                 </div>
 
-                                :''
+                                : ''
                         }
                     </div>
                     {
@@ -369,38 +375,42 @@ export default function SingleAssignment() {
                                 <span className={'text-right'} style={{paddingLeft: "65%"}}>
                                     {!isSendRequest ?
                                         <>
-                                        <span style={{color: "#1976d2", fontWeight: "bold"}}>Level  </span>
-                                        <Select
-                                            label={"Difficult"}
-                                            style={{maxWidth: "17%"}}
-                                            name={'subject'}
-                                            onChange={changeDifficultType}
-                                            value={difficultTypeState}
-                                        >
-                                            <MenuItem value={'VERY_EASY'}>VERY_EASY</MenuItem>
-                                            <MenuItem value={'EASY'}>EASY</MenuItem>
-                                            <MenuItem value={'NORMAL'}>NORMAL</MenuItem>
-                                            <MenuItem value={'DIFFICULT'}>DIFFICULT</MenuItem>
-                                            <MenuItem value={'VERY_DIFFICULT'}>VERY_DIFFICULT</MenuItem>
-                                        </Select>
-                                        <Button onClick={handleSendRequest} className={'text'}><ArrowForwardIcon/>Ok</Button>
+                                            <span style={{color: "#1976d2", fontWeight: "bold"}}>Level  </span>
+                                            <Select
+                                                label={"Difficult"}
+                                                style={{maxWidth: "17%"}}
+                                                name={'subject'}
+                                                onChange={changeDifficultType}
+                                                value={difficultTypeState}
+                                            >
+                                                <MenuItem value={'VERY_EASY'}>VERY_EASY</MenuItem>
+                                                <MenuItem value={'EASY'}>EASY</MenuItem>
+                                                <MenuItem value={'NORMAL'}>NORMAL</MenuItem>
+                                                <MenuItem value={'DIFFICULT'}>DIFFICULT</MenuItem>
+                                                <MenuItem value={'VERY_DIFFICULT'}>VERY_DIFFICULT</MenuItem>
+                                            </Select>
+                                            <Button onClick={handleSendRequest} className={'text'}><ArrowForwardIcon/>Ok</Button>
 
-                                        </>:
+                                        </> :
                                         assignment && assignment.responseId != undefined ?
                                             <p style={{marginLeft: 371}}>
                                                 <span>Send the Answer</span>
                                                 <input type={"file"} onChange={handleChangeUpload}/>
-                                                <Button onClick={handleSendAnswer} style={{marginRight: 500, marginTop: 24}}>Send<SendIcon/></Button>
+                                                <Button onClick={handleSendAnswer} style={{
+                                                    marginRight: 500,
+                                                    marginTop: 24
+                                                }}>Send<SendIcon/></Button>
                                             </p> :
-                                            <span style={{color: "red"}}>You have already sent the request solve!!</span>
+                                            <span
+                                                style={{color: "red"}}>You have already sent the request solve!!</span>
                                     }
 
                                 </span>
                             </div> : ''
                     }
                     {
-                        assignment && (assignment.isAnswered && assignment.responseId == user.id ) ?
-                        <h3 className={'text-center'}>You have submitted your answer!!</h3> : ''
+                        assignment && (assignment.isAnswered && assignment.responseId == user.id) ?
+                            <h3 className={'text-center'}>You have submitted your answer!!</h3> : ''
                     }
                 </div>
                 <Footer/>

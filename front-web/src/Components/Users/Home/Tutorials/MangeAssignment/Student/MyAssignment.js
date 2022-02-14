@@ -61,6 +61,8 @@ export default function MyAssignment() {
         })
     }
 
+    console.log(assignments)
+
     return (
         <TableContainer component={Paper}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -84,11 +86,12 @@ export default function MyAssignment() {
                             key={assignment.id}
                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                         >
-                            <TableCell align="center">{index + 1}</TableCell>
-                            <TableCell align="center">{assignment.title}</TableCell>
+                            {/*<TableCell align="center">{index + 1}</TableCell>*/}
+                            <TableCell style={{color: "blue"}} align="left">#{assignment.assignmentUrl}</TableCell>
+                            <TableCell align="left">{assignment.title}</TableCell>
                             <TableCell align="center">{assignment.subject && assignment.subject.length > 0 ?  assignment.subject : 'Other'}</TableCell>
                             <TableCell align="center">{assignment.grade}</TableCell>
-                            <TableCell align="center">{assignment.difficultType && assignment.difficultType.length > 0 ?  assignment.subject : <HourglassEmptyTwoToneIcon style={{fill: "#1976d2"}}/>}</TableCell>
+                            <TableCell align="center">{assignment.difficultType ?  assignment.difficultType : <HourglassEmptyTwoToneIcon style={{fill: "#1976d2"}}/>}</TableCell>
                             <TableCell align="center">{assignment.isAnswered ? <CheckCircleOutlineOutlinedIcon style={{fill: "green"}}/> : <CancelOutlinedIcon style={{fill: "red"}}/>}</TableCell>
                             <TableCell align="center">{!assignment.difficultType ||  assignment.difficultType === 0 ?  <HourglassEmptyTwoToneIcon style={{fill: "#1976d2"}}/> : assignment.rate}</TableCell>
                             <TableCell align="center">{

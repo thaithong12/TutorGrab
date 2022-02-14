@@ -5,6 +5,7 @@ import assignmentReducer from "./assignmentReducer";
 import subjectReducer from "./subjectReducer";
 import assignmentDetailReducer from "./assignmentDetailReducer";
 import WebSocketReducer from "./wsReducer";
+import requestReducer from "./requestReducer";
 
 const rootReducer = combineReducers({
     user: userReducer,
@@ -12,7 +13,8 @@ const rootReducer = combineReducers({
     assignments: assignmentReducer,
     subjects: subjectReducer,
     assignment: assignmentDetailReducer,
-    wsInfo: WebSocketReducer
+    wsInfo: WebSocketReducer,
+    requestSolved: requestReducer
 })
 
 export default rootReducer;

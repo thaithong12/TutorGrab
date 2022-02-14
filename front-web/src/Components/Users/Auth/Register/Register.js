@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 import {Link} from "react-router-dom";
 import ScriptTag from "react-script-tag";
 import {Helmet} from "react-helmet";
@@ -7,7 +7,6 @@ import ToastServive from "react-material-toast";
 import axios from 'axios'
 import {API_URL} from "../../../../Constants/Constant";
 import {history} from "../../../../Helper/history";
-import Progress from 'react-progressbar';
 import Modal from "simple-react-modal";
 
 export default function Register() {
@@ -25,8 +24,8 @@ export default function Register() {
         rePassword: '',
         role: '',
         identification: '',
-        certificate: '',
-        university: ''
+        studentCard: '',
+        collegeDegree: ''
     });
 
     const [err, setErr] = useState({
@@ -67,7 +66,7 @@ export default function Register() {
                 return resolve(true);
                 ;
             }
-            if (userRegister.password != userRegister.rePassword) {
+            if (userRegister.password !== userRegister.rePassword) {
                 setErr({...err, isErr: true, msg: 'Repass not same'})
                 return resolve(true);
                 ;
@@ -79,12 +78,12 @@ export default function Register() {
                     return resolve(true);
                     ;
                 }
-                if (!userRegister.certificate || userRegister.certificate === '') {
-                    setErr({...err, isErr: true, msg: 'certificate can not blank'})
+                if (!userRegister.studentCard || userRegister.studentCard === '') {
+                    setErr({...err, isErr: true, msg: 'StudentCard can not blank'})
                     return resolve(true);
                 }
-                if (!userRegister.university || userRegister.university === '') {
-                    setErr({...err, isErr: true, msg: 'university can not blank'})
+                if (!userRegister.collegeDegree || userRegister.collegeDegree === '') {
+                    setErr({...err, isErr: true, msg: 'CollegeDegree can not blank'})
                     return resolve(true);
                 }
             }
@@ -229,7 +228,7 @@ export default function Register() {
                                         </Select>
                                     </div>
                                     {
-                                        userRegister.role == 'ROLE_TEACHER' ?
+                                        userRegister.role === 'ROLE_TEACHER' ?
                                             <div>
                                                 <div className="form-group">
                                                     <label htmlFor="identification"><i
@@ -238,14 +237,16 @@ export default function Register() {
                                                            name="identification" id="identification" accept="image/*"/>
                                                 </div>
                                                 <div className="form-group">
-                                                    <label htmlFor="re-pass"><i className="zmdi zmdi-lock-outline"></i>Certificate</label>
-                                                    <input onChange={handleChangeUpload} type="file" name="certificate"
-                                                           id="certificate" title="your text" accept="image/*"/>
+                                                    <label htmlFor="re-pass"><i className="zmdi zmdi-lock-outline"></i>Student
+                                                        Card</label>
+                                                    <input onChange={handleChangeUpload} type="file" name="studentCard"
+                                                           id="studentCard" title="your text" accept="image/*"/>
                                                 </div>
                                                 <div className="form-group">
-                                                    <label htmlFor="re-pass"><i className="zmdi zmdi-lock-outline"></i>University</label>
-                                                    <input onChange={handleChangeUpload} type="file" name="university"
-                                                           id="university" accept="image/*"/>
+                                                    <label htmlFor="re-pass"><i className="zmdi zmdi-lock-outline"></i>CollegeDegree</label>
+                                                    <input onChange={handleChangeUpload} type="file"
+                                                           name="collegeDegree"
+                                                           id="collegeDegree" accept="image/*"/>
                                                 </div>
                                             </div>
                                             : ''

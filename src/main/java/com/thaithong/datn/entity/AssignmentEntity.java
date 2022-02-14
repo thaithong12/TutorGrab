@@ -55,10 +55,16 @@ public class AssignmentEntity extends BaseEntity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String grade;
 
+    @Column(name = "assignment_url")
+    private String assignmentUrl;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assignment")
     private List<UserAssignment> userAssignments;
 
     @ManyToOne
     @JoinColumn(name = "subject_id")
     private SubjectEntity subject;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "assignmentEntity")
+    private List<RequestEntity> requestEntities;
 }

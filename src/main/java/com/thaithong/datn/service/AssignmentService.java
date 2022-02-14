@@ -67,7 +67,8 @@ public class AssignmentService {
     public void deleteAssignment(Long id) {
         var ass = assignmentRepository.findByIdAndIsDeleted(id, false);
         throwNotFoundException(id, ass);
-        var listRequest = requestRepository.findByAssignmentId(id);
+//        var listRequest = requestRepository.findByAssignmentId(id);
+        var listRequest = requestRepository.findByAssignmentEntity_Id(id);
         if (!CollectionUtils.isEmpty(listRequest)) {
             return;
         }
@@ -126,7 +127,8 @@ public class AssignmentService {
 
     public AssignmentResponseModel updateAssignment(Long id, AssignmentRequestModel requestModel) {
         var assignment = assignmentRepository.findByIdAndIsDeleted(id, false);
-        var listRequest = requestRepository.findByAssignmentId(id);
+//        var listRequest = requestRepository.findByAssignmentId(id);
+        var listRequest = requestRepository.findByAssignmentEntity_Id(id);
         throwNotFoundException(id, assignment);
         if (assignment.getIsAnswered() || !CollectionUtils.isEmpty(listRequest)) {
             throw new CustomErrorException(HttpStatus.BAD_REQUEST,
@@ -177,6 +179,8 @@ public class AssignmentService {
             ass.setIsDeleted(false);
             ass.setGrade(requestModel.getGrade());
             ass.setTextContent(requestModel.getTextContent());
+            int randomNumber = (int)(Math.random()*(100000-10000+1)+10000);
+            ass.setAssignmentUrl("ASS" + randomNumber);
 
             var subject = subjectRepository.findByName(requestModel.getSubject());
             if (ObjectUtils.isEmpty(subject)) {
@@ -214,6 +218,7 @@ public class AssignmentService {
         ass.setGrade(assignmentEntity.getGrade());
         ass.setTextContent(assignmentEntity.getTextContent());
         ass.setAnswer(assignmentEntity.getAnswer());
+        ass.setAssignmentUrl(assignmentEntity.getAssignmentUrl());
 
         var assRelation = assignmentEntity.getUserAssignments()
                 .stream()
@@ -268,5 +273,14 @@ public class AssignmentService {
 
         obj = assignmentRepository.save(obj);
         return convertEntityToResponseModel(obj);
+    }
+
+    public AssignmentEntity findEntityById (Long id) {
+        var assEntity = assignmentRepository.findById(id);
+        if (assEntity.isEmpty()) {
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400001", "Cannot update this assignment!"));
+        }
+        return assEntity.get();
     }
 }

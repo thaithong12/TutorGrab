@@ -1,6 +1,7 @@
 package com.thaithong.datn.repository;
 
 import com.thaithong.datn.entity.UserEntity;
+import com.thaithong.datn.enums.AccountRole;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -24,4 +25,6 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
 
     @Query(value = "SELECT u.email FROM users u WHERE u.id = :userId", nativeQuery = true)
     String getNameByUserId(@Param(value = "userId") Long id);
+
+    List<UserEntity> findByAccountRoles_Role(AccountRole accountRoles_role);
 }

@@ -40,10 +40,10 @@ export const _login = (user) => ({
 
 export const fetchDataUser = () => {
     return async (dispatch) => {
-        let jwtStr = localStorage.getItem("Authorization");
+        let jwtStr = 'Token ' + localStorage.getItem("Authorization");
         return await axios.post(API_URL + '/auth/fetch', {jwt: jwtStr}).then(res => {
             if (res.data) {
-                //dispatch(_fetchDataUser({...res.data}));
+                dispatch(_fetchDataUser({...res.data}));
             }
         }).catch(err => {
             console.log(err);

@@ -32,5 +32,11 @@ public class JwtRequestModel {
     @Size(max = 20)
     private String phoneNumber;
 
+    private String identification;
+
+    private String studentCard;
+
+    private String collegeDegree;
+
     private String role;
 }

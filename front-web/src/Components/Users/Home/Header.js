@@ -4,6 +4,7 @@ import {useSelector} from "react-redux";
 import axios from "axios";
 import {API_URL, END_POINT_FETCH_USER} from "../../../Constants/Constant";
 import {history} from "../../../Helper/history";
+import Notification from "../Notification/Notification";
 
 export default function Header() {
     const [curUrl, setCurUrl] = useState({url: '/home'});
@@ -45,6 +46,20 @@ export default function Header() {
         localStorage.clear();
         setUser({...initUser, loggedIn: false})
         history.push('/sign-in');
+        setTimeout(() => {
+            window.location.reload();
+        }, 200)
+    }
+
+    function isHaveRoleAdmin () {
+        let check = false;
+        if (user && user.roles && user.roles.length > 0) {
+            for (let temp of user.roles) {
+                if (temp === 'ROLE_ADMIN')
+                    check = true;
+            }
+        }
+        return check;
     }
 
     return (
@@ -78,23 +93,25 @@ export default function Header() {
                                     <li className={curUrl.url.includes('/assignments') ? "active" : ""}>
                                         <Link to='/assignments' className="nav-link">Assignments</Link>
                                     </li>
-                                    <li className={curUrl.url.includes('/blogs') ? "active" : ""}>
+                                    {/*<li className={curUrl.url.includes('/blogs') ? "active" : ""}>
                                         <Link to="/blogs" tppabs="https://preview.colorlib.com/theme/tutor/blog.html"
-                                              className="nav-link">Blog</Link></li>
+                                              className="nav-link">Blog</Link></li>*/}
                                     <li className={curUrl.url.includes('/about-us') ? "active" : ""}>
                                         <Link to="/about-us"
                                               tppabs="https://preview.colorlib.com/theme/tutor/about.html"
                                               className="nav-link">About</Link></li>
-                                    <li className={curUrl.url.includes('/contact') ? "active" : ""}>
+                                    {/*<li className={curUrl.url.includes('/contact') ? "active" : ""}>
                                         <Link to="/contact"
                                               tppabs="https://preview.colorlib.com/theme/tutor/contact.html"
-                                              className="nav-link">Contact</Link></li>
+                                              className="nav-link">Contact</Link></li>*/}
                                     <li>
                                         {
                                             curUser && curUser.loggedIn ?
                                                 <>
-                                                    <Link className="nav-link"
-                                                          tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html">Hello {user.email}</Link>
+                                                    <Link
+                                                        to={isHaveRoleAdmin() ? '/admin': '#'}
+                                                        className="nav-link"
+                                                        tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html">Hello {user.email}</Link>
 
                                                     <Link to="/logout" onClick={handleLogout}
                                                           tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html"
@@ -105,6 +122,9 @@ export default function Header() {
                                                         tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html"
                                                         className="nav-link">SignIn</Link>
                                         }
+                                    </li>
+                                    <li>
+                                        <Notification/>
                                     </li>
                                 </ul>
                             </nav>

@@ -94,6 +94,9 @@ public class AuthService {
             // set role
             if (user.getRole().equals(AccountRole.ROLE_TEACHER.name())) {
                 entity.setIsAuthorized(false);
+                entity.setIdentification(user.getIdentification());
+                entity.setStudentCard(user.getStudentCard());
+                entity.setCollegeDegree(user.getCollegeDegree());
             }
             var roleEntities = new ArrayList<RoleEntity>();
             var role = roleService.getRole(AccountRole.valueOf(user.getRole()));
@@ -224,7 +227,7 @@ public class AuthService {
         mailMessage.setTo(email);
         mailMessage.setSubject(String.format("%s", subject));
         mailMessage.setText("To confirm your account, please click here : "
-                + "http://localhost/api/auth/active-account?token=" + token);
+                + "http://localhost:3000/active-account/" + token);
         sender.send(mailMessage);
     }
 

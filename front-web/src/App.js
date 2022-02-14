@@ -10,6 +10,7 @@ function App() {
     return (
         <div className="App">
             <Router history={history}>
+                <p style={{position: "fixed", left: 0, bottom: 0}}>TimeLeft</p>
                 <HomeDefault/>
                 <AuthHome/>
             </Router>
