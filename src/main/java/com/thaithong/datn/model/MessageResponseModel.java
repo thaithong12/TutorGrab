@@ -27,7 +27,9 @@ public class MessageResponseModel {
 
     private String text;
 
-    private String file;
+    private String fileName;
+
+    private Long groupId;
 
     @Enumerated(EnumType.STRING)
     private MessageType type;

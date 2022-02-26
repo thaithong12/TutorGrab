@@ -12,6 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserRequestModel {
+    private Long userId;
+
     private String name;
 
     private String phoneNumber;

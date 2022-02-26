@@ -3,7 +3,7 @@ import Header from "../Header";
 import HomeScript from "../HomeScript";
 import Footer from "../Footer";
 import {useDispatch, useSelector} from "react-redux";
-import {_publishedAssignment, _topUser, publishedAssignment, topUser} from "../../../../Actions/homeAction";
+import {_publishedAssignment, _topUser} from "../../../../Actions/homeAction";
 import {Link} from "react-router-dom";
 import axios from "axios";
 import {API_URL, END_POINT_PUBLISHED_ASSIGNMENT, END_POINT_TOP_USER} from "../../../../Constants/Constant";
@@ -16,13 +16,14 @@ export default function Home() {
     const topUserState = useSelector(state => state.topUser);
 
     const [publishedAssignmentState, setPublishedList] = useState([]);
+    let [textSearch, setText] = useState('');
 
     const [topUserLeft, setUserLeft] = useState({});
-    const [topUserRight , setUserRight] = useState([]);
-    const [currentPage, setCurrentPage] = useState(0);  //trang hiện tại
-    const [dataPerPage, setDataPerPage] = useState(3); //tin tức mỗi trang
-    const [currentTodos, setCurrentTodo] = useState([]); //*cắt* dữ liệu ban đầu, lấy ra 1 mảng dữ liệu mới cho trang hiện tại
-    const [pages, setPages] = useState([]);
+    const [topUserRight, setUserRight] = useState([]);
+    let [currentPage, setCurrentPage] = useState(0);  //trang hiện tại
+    let [dataPerPage, setDataPerPage] = useState(3); //tin tức mỗi trang
+    let [currentTodos, setCurrentTodo] = useState([]); //*cắt* dữ liệu ban đầu, lấy ra 1 mảng dữ liệu mới cho trang hiện tại
+    let [pages, setPages] = useState([]);
 
     useEffect(() => {
         async function fetchData() {
@@ -33,7 +34,7 @@ export default function Home() {
             }).catch(err => {
                 console.log(err);
             })
-            //await dispatch(publishedAssignment());
+
             await axios.get(API_URL + END_POINT_PUBLISHED_ASSIGNMENT).then(res => {
                 dispatch(_publishedAssignment(res.data));
                 setPublishedList([...res.data])
@@ -43,21 +44,31 @@ export default function Home() {
                 console.log(err);
             })
         }
-
-        async function createPages(listData) {
-            let arr = []
-            for (let i = 0; i < Math.ceil(listData.length / dataPerPage); i++) {
-                arr[i] = i;
-            }
-            await setPages([...arr]);
-        }
-
         fetchData();
     }, []);
 
+    async function createPages(listData) {
+        let arr = []
+        for (let i = 0; i < Math.ceil(listData.length / dataPerPage); i++) {
+            arr[i] = i;
+        }
+        await setPages([...arr]);
+    }
+
     function handleChangePage(index) {
         setCurrentPage(index);
-        setCurrentTodo([...publishedAssignmentState].slice(index* dataPerPage, index*dataPerPage + dataPerPage));
+        setCurrentTodo([...publishedAssignmentState].slice(index * dataPerPage, index * dataPerPage + dataPerPage));
+    }
+
+    function handleChangeTextSearch(event) {
+        let text = event.target.value;
+        let newArr = [...publishedAssignmentState];
+        let filterArr = newArr.filter(item => item.content.includes(text)
+            || item.subject.name.includes(text) || item.textContent.includes(text));
+        console.log(filterArr)
+        createPages(filterArr);
+        setCurrentPage(0);
+        setCurrentTodo(filterArr.slice(0, 0 + dataPerPage));
     }
 
     return (
@@ -119,7 +130,7 @@ export default function Home() {
                                 </div>
                             </div>
                             <div className="col-lg-4" style={{zIndex: 1}}>
-                                <div className="box small h-100" >
+                                <div className="box small h-100">
                                     {
                                         topUserState && topUserState.length > 1 ?
                                             topUserState.map((val, index) => (
@@ -216,8 +227,10 @@ export default function Home() {
                             <div className="col-lg-6 mb-4 mb-lg-0">
                                 <form action="#" className="d-flex search-form">
                                     <span className="icon-"></span>
-                                    <input type="search" className="form-control mr-2" placeholder="Search subjects"/>
-                                    <input type="submit" className="btn btn-primary px-4" value="Search"/>
+                                    <input onChange={(e) => handleChangeTextSearch(e)} type="search"
+                                           className="form-control mr-2" placeholder="Search subjects"/>
+                                    <input disabled={true} type="submit" className="btn btn-primary px-4"
+                                           value="Search"/>
                                 </form>
                             </div>
                             <div className="col-lg-6 text-lg-right">
@@ -244,26 +257,27 @@ export default function Home() {
                                                 <div className="img-wrap">
                                                     <a href="#">
                                                         <img src={"image/" + val.subject.image}
-                                                                     tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_1.jpg.pagespeed.ic.fJQ6KqbRC8.jpg"
-                                                                     alt="Image" className="img-fluid wrap-icon"/>
+                                                             tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_1.jpg.pagespeed.ic.fJQ6KqbRC8.jpg"
+                                                             alt="Image" className="img-fluid wrap-icon"/>
                                                     </a>
                                                 </div>
                                                 <div>
                                                     <h3><a href="#">{val.title}</a></h3>
-                                                    <p><strong>Subject: </strong> {val.subject.name} &emsp;<strong>Level: </strong>{val.grade}</p>
+                                                    <p><strong>Subject: </strong> {val.subject.name} &emsp;
+                                                        <strong>Level: </strong>{val.grade}</p>
                                                     <p className="mb-0">
                                                         <span className="brand-react h5"></span>
                                                         <span className="brand-javascript h5"></span>
                                                     </p>
                                                     <p className="meta">
-                                                        <span className="mr-2 mb-2"><TimeAgo datetime={val.createdAt} /></span>
+                                                        <span className="mr-2 mb-2"><TimeAgo datetime={val.createdAt}/></span>
                                                     </p>
-                                                    <p><Link to={'/assignments/'+ val.id}
-                                                          tppabs="https://preview.colorlib.com/theme/tutor/tutorial-single.html"
-                                                          className="btn btn-primary custom-btn">View</Link></p>
+                                                    <p><Link to={'/assignments/' + val.id}
+                                                             tppabs="https://preview.colorlib.com/theme/tutor/tutorial-single.html"
+                                                             className="btn btn-primary custom-btn">View</Link></p>
                                                 </div>
                                             </div>
-                                        )) : ''
+                                        )) : <h1>No have data yet.</h1>
                                 }
 
                                 <div className="custom-pagination">
@@ -309,7 +323,7 @@ export default function Home() {
                 </div>
                 {/*list job end*/}
 
-                <div className="site-section bg-light">
+                {/*<div className="site-section bg-light">
                     <div className="container">
                         <div className="row justify-content-center">
                             <div className="col-lg-7 text-center mb-5">
@@ -403,9 +417,9 @@ export default function Home() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>*/}
             </div>
-            <ChatHome />
+            <ChatHome/>
             <HomeScript/>
             <Footer/>
         </div>

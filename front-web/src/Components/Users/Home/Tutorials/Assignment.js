@@ -8,6 +8,7 @@ import MyAssignment from "./MangeAssignment/Student/MyAssignment";
 import {useSelector} from "react-redux";
 import {TodoAssignment} from "./MangeAssignment/Tutor/TodoAssignment";
 import {CompletedAssignment} from "./MangeAssignment/Tutor/CompletedAssignment";
+import RequestSolved from "./MangeAssignment/Student/RequestSolved";
 
 export default function Assignment() {
     // Tab Panel Value`
@@ -40,17 +41,21 @@ export default function Assignment() {
                     <Box sx={{width: '100%'}}>
                         <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
                             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                                <Tab label={user && user.roles[0] == 'ROLE_TEACHER' ? "Todo Assignments" : "New Assignment"}
+                                <Tab label={user && user.roles[0] === 'ROLE_TEACHER' ? "Todo Assignments" : "New Assignment"}
                                      {...a11yProps(0)} />
-                                <Tab label={user && user.roles[0] == 'ROLE_TEACHER' ? "Completed Assignments" : "My Assignment"}  {...a11yProps(1)} />
+                                <Tab label={user && user.roles[0] === 'ROLE_TEACHER' ? "Completed Assignments" : "My Assignment"}  {...a11yProps(1)} />
+                                <Tab label={user && user.roles[0] !== 'ROLE_TEACHER' ? "Request Solved" : ""}  {...a11yProps(2)} />
                             </Tabs>
                         </Box>
                         <div style={{border: "1px solid", borderRadius: 10, marginTop: 15}}>
                             <TabPanel value={value} index={0}>
-                                {user && user.roles[0] == 'ROLE_TEACHER' ? <TodoAssignment/> : <NewAssignment/>}
+                                {user && user.roles[0] === 'ROLE_TEACHER' ? <TodoAssignment/> : <NewAssignment/>}
                             </TabPanel>
                             <TabPanel value={value} index={1}>
-                                {user && user.roles[0] == 'ROLE_TEACHER' ? <CompletedAssignment/> : <MyAssignment/>}
+                                {user && user.roles[0] === 'ROLE_TEACHER' ? <CompletedAssignment/> : <MyAssignment/>}
+                            </TabPanel>
+                            <TabPanel value={value} index={2}>
+                                {user && user.roles[0] !== 'ROLE_TEACHER' ? <RequestSolved isOpenModal={true}/> : ''}
                             </TabPanel>
 
                         </div>
@@ -66,7 +71,7 @@ export default function Assignment() {
 }
 
 
-function TabPanel(props) {
+export function TabPanel(props) {
     const {children, value, index, ...other} = props;
 
     return (
@@ -86,7 +91,7 @@ function TabPanel(props) {
     );
 }
 
-function a11yProps(index) {
+export function a11yProps(index) {
     return {
         id: `simple-tab-${index}`,
         'aria-controls': `simple-tabpanel-${index}`,

@@ -2,7 +2,6 @@ package com.thaithong.datn.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,6 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
@@ -20,7 +18,7 @@ import java.util.List;
 @Getter
 @Setter
 public class UserEntity extends BaseEntity {
-    @Column(unique=true)
+    @Column(unique = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String email;
 
@@ -34,13 +32,14 @@ public class UserEntity extends BaseEntity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String phoneNumber;
 
+    //@Column(name = "wstoken")
     private String token;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String avatar;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @Column(columnDefinition="LONGTEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String jwt;
 
     /**
@@ -73,7 +72,7 @@ public class UserEntity extends BaseEntity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date tokenExpDate;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "user_role_relationship",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -88,7 +87,7 @@ public class UserEntity extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<UserAssignment> userAssignments;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "creditcard_id", referencedColumnName = "id")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "creditcard_id")
     private CreditCardEntity creditCardEntity;
 }

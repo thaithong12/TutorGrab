@@ -40,7 +40,7 @@ public class AssignmentResponseModel {
 
     private String content;
 
-    private Double rate;
+    private Integer rate;
 
     private String grade;
 
@@ -61,6 +61,8 @@ public class AssignmentResponseModel {
     private Long responseId;
 
     private String answer;
+
+    private String assignmentUrl;
 
     private SubjectResponseModel subject;
 }

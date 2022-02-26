@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping(value = "/api/auth")
 @CrossOrigin
 public class AuthController {
-
     @Autowired
     private AuthService authService;
 

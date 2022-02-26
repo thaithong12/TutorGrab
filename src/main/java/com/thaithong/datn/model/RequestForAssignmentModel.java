@@ -10,6 +10,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RequestForAssignmentModel {
+    private Long requestId;
+
     private Long responseId;
 
     private Long assignmentId;

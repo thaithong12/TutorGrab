@@ -65,9 +65,9 @@ export const getAssignmentsOfUser = (id, who) => {
     return async (dispatch) => {
         return await axios.get(API_URL + END_POINT_ASSIGNMENT + '/user/' + id + '/' + who).then(res => {
             dispatch(_getAssignmentsOfUser(res.data));
+            console.log(res.data)
         }).catch((error) => {
-            toast.error(error.response.data.message.toUpperCase(), () => {
-            });
+            console.log(error)
         });
     }
 };

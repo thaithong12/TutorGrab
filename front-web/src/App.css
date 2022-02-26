@@ -9,7 +9,10 @@
 .chat-container {
     max-height: 500px;
     max-width: 1000px;
+    overflow-y: scroll;
+    height: 486px;
     z-index: 2;
+    background-color: #1e1e1e;
 }
 
 .drop-text {
@@ -31,4 +34,268 @@
 .modal-custom button {
     font-size: 15px;
     padding: 12px;
+}
+
+.loader {
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    width: 60px;
+    height: 60px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.chatbox {
+    background: rgba(255, 255, 255, 0.05);
+    width: 600px;
+    height: 75%;
+    border-radius: 0.2em;
+    /*position: relative;*/
+    box-shadow: 1px 1px 12px rgba(0, 0, 0, 0.1);
+}
+.chatbox-content-right {
+    float: right;
+}
+.chatbox-content-right:after {
+    content: "";
+    position: absolute;
+    margin: -1.5em -17.06em;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    /*border-right: 10px solid rgba(255, 255, 255, 0.2);*/
+}
+.chatbox-content-left {
+    float: left;
+}
+.chatbox-content-left:after {
+    content: "";
+    position: absolute;
+    margin: -1.5em 1.87em;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    /*border-left: 10px solid rgba(255, 255, 255, 0.2);*/
+}
+.chatbox__messages__user-message {
+    width: 450px;
+}
+.chatbox-content-left{
+    background: rgba(255, 255, 255, 0.2);
+    padding: 1em 0;
+    height: auto;
+    width: 65%;
+    border-radius: 5px;
+    margin: 2em 1em;
+    overflow: auto;
+}
+.chatbox-content-right {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 1em 0;
+    height: auto;
+    width: 65%;
+    border-radius: 5px;
+    margin: 2em 1em;
+    overflow: auto;
+}
+.chatbox-content-left > p.name {
+    color: #fff;
+    font-size: 1em;
+}
+
+.chatbox-content-right > p.name {
+    color: #fff;
+    font-size: 1em;
+}
+.chatbox-content-left > p.message {
+     color: #fff;
+     font-size: 0.7em;
+     margin: 0 2.8em;
+ }
+
+.chatbox-content-right > p.message {
+    color: #fff;
+    font-size: 0.7em;
+    margin: 0 2.8em;
+}
+.chatbox__user-list {
+    background: rgba(255, 255, 255, 0.1);
+    width: 25%;
+    height: 100%;
+    float: right;
+    border-top-right-radius: 0.2em;
+    border-bottom-right-radius: 0.2em;
+}
+.chatbox__user-list h1 {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9em;
+    padding: 1em;
+    margin: 0;
+    font-weight: 300;
+    text-align: center;
+}
+.chatbox__user, .chatbox__user--away, .chatbox__user--busy, .chatbox__user--active {
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 100%;
+    margin: 1em 0.7em;
+}
+.chatbox__user--active {
+    background: rgba(23, 190, 187, 0.8);
+}
+.chatbox__user--busy {
+    background: rgba(252, 100, 113, 0.8);
+}
+.chatbox__user--away {
+    background: rgba(255, 253, 130, 0.8);
+}
+.chatbox p {
+    float: left;
+    text-align: left;
+    margin: -0.25em 2em;
+    font-size: 0.7em;
+    font-weight: 300;
+    color: #fff;
+    width: 200px;
+}
+.chatbox form {
+    background: #222;
+}
+.chatbox form input {
+    background: rgba(255, 255, 255, 0.03);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border: none;
+    width: 75%;
+    padding: 1.2em;
+    outline: none;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 300;
+}
+
+::-webkit-input-placeholder {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+:-moz-placeholder {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+::-moz-placeholder {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+:-ms-input-placeholder {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.chatbox-content-container {
+    height: 350px;
+    max-height: 400px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Dropdown Button */
+.dropbtn {
+    background-color: #04AA6D;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position: absolute;
+    display: inline-block;
+}
+
+.dropdown span {
+    line-height: 1.7;
+    color: white !important;
+    font-weight: 300;
+    font-size: 1rem;
+    //background: #fff;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    /*background-color: #f1f1f1;*/
+    min-width: 240px;
+    max-height: 200px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 2;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {
+    background-color: cadetblue;
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover span {
+    border-bottom: 2px solid white;
+}
+
+#time-left-tbl {
+    z-index: 2;
+    border: 1px solid black;
+}
+
+#time-left-tbl table th td{
+    padding: 10px;
 }

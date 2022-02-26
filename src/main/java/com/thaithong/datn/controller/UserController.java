@@ -6,15 +6,7 @@ import com.thaithong.datn.utils.CustomErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -27,6 +19,11 @@ public class UserController {
     @GetMapping("/users")
     private ResponseEntity<?> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/users/teachers")
+    private ResponseEntity<?> getAllTeacherUsers() {
+        return ResponseEntity.ok(userService.getAllTeacherUsers());
     }
 
     @GetMapping("/users/is-blocked")
@@ -78,6 +75,13 @@ public class UserController {
         return userService.processingImage(multipartFile);
     }
 
+    @PostMapping("/upload/message")
+    public ResponseEntity<?> uploadFilesOnMessage(@RequestBody MultipartFile[] multipartFile,
+                                                  @RequestParam(name = "userId") Long userId,
+                                                  @RequestParam(name = "groupUrl") String groupUrl) {
+        return userService.processingImageOnMessage(multipartFile, userId, groupUrl);
+    }
+
     @GetMapping(value = "/top-users")
     public ResponseEntity<?> getTopUser() {
         return userService.getTopUser();
@@ -86,5 +90,15 @@ public class UserController {
     @PostMapping("/upload-ckeditor")
     public ResponseEntity<?> uploadFileCKEditor (@RequestBody MultipartFile[] files) {
         return userService.processingImageCKEditor(files);
+    }
+
+    @PutMapping("/users/authorized-user")
+    private ResponseEntity<?> updateAuthorizedUser(@RequestBody UserRequestModel requestModel) {
+        try {
+            userService.updateAuthorizedUser(requestModel);
+            return ResponseEntity.ok(userService.getUserInfo(requestModel.getUserId()));
+        } catch (CustomErrorException customErrorException) {
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
+        }
     }
 }

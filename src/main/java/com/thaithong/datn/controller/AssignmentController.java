@@ -2,6 +2,7 @@ package com.thaithong.datn.controller;
 
 import com.thaithong.datn.enums.DifficultType;
 import com.thaithong.datn.model.AssignmentRequestModel;
+import com.thaithong.datn.model.ReviewAssignmentRequestModel;
 import com.thaithong.datn.service.AssignmentService;
 import com.thaithong.datn.utils.CustomErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +103,24 @@ public class AssignmentController {
     public ResponseEntity<?> updateAnswerAssignment(@PathVariable Long id, @RequestBody AssignmentRequestModel requestModel) {
         try {
             return ResponseEntity.ok(assignmentService.updateAnswerAssignment(id, requestModel));
+        } catch (CustomErrorException customErrorException) {
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
+        }
+    }
+
+    @PutMapping("/assignments/{id}/review")
+    public ResponseEntity<?> updateAnswerAssignmentReview(@PathVariable Long id, @RequestBody ReviewAssignmentRequestModel requestModel) {
+        try {
+            return ResponseEntity.ok(assignmentService.updateReviewAssignment(id, requestModel));
+        } catch (CustomErrorException customErrorException) {
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
+        }
+    }
+
+    @PutMapping("/assignments/{id}/published")
+    public ResponseEntity<?> updatePublishedAssignment(@PathVariable Long id, @RequestBody AssignmentRequestModel requestModel) {
+        try {
+            return ResponseEntity.ok(assignmentService.updatePublishedAssignment(id, requestModel));
         } catch (CustomErrorException customErrorException) {
             return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
         }

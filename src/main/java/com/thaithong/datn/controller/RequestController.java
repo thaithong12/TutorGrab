@@ -15,8 +15,17 @@ public class RequestController {
     @Autowired
     private RequestService requestService;
 
-    @GetMapping("/requests/{userId}")
-    public ResponseEntity<?> getRequestsOfUser (@PathVariable Long userId) {
+    @GetMapping("/requests-user/request/{userId}")
+    public ResponseEntity<?> getRequestsOfRequestUser (@PathVariable Long userId) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(requestService.getRequestsOfUser(userId));
+        } catch (CustomErrorException customErrorException) {
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
+        }
+    }
+
+    @GetMapping("/requests-user/response/{userId}")
+    public ResponseEntity<?> getRequestsOfResponseUser (@PathVariable Long userId) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(requestService.getRequestsOfUser(userId));
         } catch (CustomErrorException customErrorException) {
@@ -46,6 +55,24 @@ public class RequestController {
     public ResponseEntity<?> createRequestForAssignment (@RequestBody RequestForAssignmentModel requestModel) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(requestService.createRequestForAssignment(requestModel));
+        } catch (CustomErrorException customErrorException) {
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
+        }
+    }
+
+    @PostMapping("/requests/accept")
+    public ResponseEntity<?> acceptRequest (@RequestBody RequestForAssignmentModel requestModel) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(requestService.acceptRequest(requestModel));
+        } catch (CustomErrorException customErrorException) {
+            return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
+        }
+    }
+
+    @PostMapping("/requests/reject")
+    public ResponseEntity<?> rejectRequest (@RequestBody RequestForAssignmentModel requestModel) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(requestService.rejectRequest(requestModel));
         } catch (CustomErrorException customErrorException) {
             return ResponseEntity.status(customErrorException.getStatus()).body(customErrorException.getData());
         }

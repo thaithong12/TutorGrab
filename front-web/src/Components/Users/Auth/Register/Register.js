@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 import {Link} from "react-router-dom";
 import ScriptTag from "react-script-tag";
 import {Helmet} from "react-helmet";
@@ -7,7 +7,7 @@ import ToastServive from "react-material-toast";
 import axios from 'axios'
 import {API_URL} from "../../../../Constants/Constant";
 import {history} from "../../../../Helper/history";
-import Progress from 'react-progressbar';
+import Modal from "simple-react-modal";
 
 export default function Register() {
     const toast = ToastServive.new({
@@ -24,14 +24,16 @@ export default function Register() {
         rePassword: '',
         role: '',
         identification: '',
-        certificate: '',
-        university: ''
+        studentCard: '',
+        collegeDegree: ''
     });
 
     const [err, setErr] = useState({
         isErr: false,
         msg: ''
     })
+
+    const [isLoading, setIsLoading] = useState(false);
 
     function validation() {
         return new Promise(resolve => {
@@ -64,7 +66,7 @@ export default function Register() {
                 return resolve(true);
                 ;
             }
-            if (userRegister.password != userRegister.rePassword) {
+            if (userRegister.password !== userRegister.rePassword) {
                 setErr({...err, isErr: true, msg: 'Repass not same'})
                 return resolve(true);
                 ;
@@ -76,12 +78,12 @@ export default function Register() {
                     return resolve(true);
                     ;
                 }
-                if (!userRegister.certificate || userRegister.certificate === '') {
-                    setErr({...err, isErr: true, msg: 'certificate can not blank'})
+                if (!userRegister.studentCard || userRegister.studentCard === '') {
+                    setErr({...err, isErr: true, msg: 'StudentCard can not blank'})
                     return resolve(true);
                 }
-                if (!userRegister.university || userRegister.university === '') {
-                    setErr({...err, isErr: true, msg: 'university can not blank'})
+                if (!userRegister.collegeDegree || userRegister.collegeDegree === '') {
+                    setErr({...err, isErr: true, msg: 'CollegeDegree can not blank'})
                     return resolve(true);
                 }
             }
@@ -91,12 +93,15 @@ export default function Register() {
 
     async function handleSubmitForm(event) {
         event.preventDefault();
+        setIsLoading(true);
         await validation().then(relsove => {
             if (relsove) {
                 toast.error(err.msg.toUpperCase(), () => {
                 });
+                setIsLoading(false);
                 return;
             } else {
+
                 axios.post(API_URL + '/auth/register', userRegister, {
                     headers: {
                         'Content-Type': 'application/json'
@@ -105,9 +110,16 @@ export default function Register() {
                     history.push('/sign-in');
                     toast.success('Email has been send, pls check it & active account', () => {
                     });
+                    setIsLoading(false);
                 }).catch(error => {
-                    toast.error(error.response.data.message.toUpperCase(), () => {
-                    });
+                    if (error.response) {
+                        // toast.error(error.response.data.message.toUpperCase(), () => {
+                        // });
+                        console.log(error.response);
+                    } else {
+                        console.log(error);
+                    }
+                    setIsLoading(false);
                 })
             }
         });
@@ -150,6 +162,16 @@ export default function Register() {
 
     return (
         <div>
+            <Modal
+                className="test-class" //this will completely overwrite the default css completely
+                style={{background: 'red', position: 'fixed'}} //overwrites the default background
+                containerStyle={{background: '#f8f8f8'}} //changes styling on the inner content area
+                containerClassName="test"
+                closeOnOuterClick={true}
+                show={isLoading}
+                onClose={() => setIsLoading(false)}>
+                <div className={'loader'}></div>
+            </Modal>
             <Helmet>
                 <link rel="stylesheet" href="/css/style.scoped.css"/>
                 <link rel="stylesheet" href="/css/material-icon/css/material-design-iconic-font.scoped.min.css"/>
@@ -207,7 +229,7 @@ export default function Register() {
                                         </Select>
                                     </div>
                                     {
-                                        userRegister.role == 'ROLE_TEACHER' ?
+                                        userRegister.role === 'ROLE_TEACHER' ?
                                             <div>
                                                 <div className="form-group">
                                                     <label htmlFor="identification"><i
@@ -216,14 +238,16 @@ export default function Register() {
                                                            name="identification" id="identification" accept="image/*"/>
                                                 </div>
                                                 <div className="form-group">
-                                                    <label htmlFor="re-pass"><i className="zmdi zmdi-lock-outline"></i>Certificate</label>
-                                                    <input onChange={handleChangeUpload} type="file" name="certificate"
-                                                           id="certificate" title="your text" accept="image/*"/>
+                                                    <label htmlFor="re-pass"><i className="zmdi zmdi-lock-outline"></i>Student
+                                                        Card</label>
+                                                    <input onChange={handleChangeUpload} type="file" name="studentCard"
+                                                           id="studentCard" title="your text" accept="image/*"/>
                                                 </div>
                                                 <div className="form-group">
-                                                    <label htmlFor="re-pass"><i className="zmdi zmdi-lock-outline"></i>University</label>
-                                                    <input onChange={handleChangeUpload} type="file" name="university"
-                                                           id="university" accept="image/*"/>
+                                                    <label htmlFor="re-pass"><i className="zmdi zmdi-lock-outline"></i>CollegeDegree</label>
+                                                    <input onChange={handleChangeUpload} type="file"
+                                                           name="collegeDegree"
+                                                           id="collegeDegree" accept="image/*"/>
                                                 </div>
                                             </div>
                                             : ''

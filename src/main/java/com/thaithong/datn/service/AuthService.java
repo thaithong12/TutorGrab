@@ -2,12 +2,17 @@ package com.thaithong.datn.service;
 
 import com.google.common.base.Strings;
 import com.thaithong.datn.config.JwtUtil;
+import com.thaithong.datn.entity.CreditCardEntity;
+import com.thaithong.datn.entity.NotificationEntity;
 import com.thaithong.datn.entity.RoleEntity;
 import com.thaithong.datn.entity.UserEntity;
 import com.thaithong.datn.enums.AccountRole;
 import com.thaithong.datn.model.JwtRequestModel;
 import com.thaithong.datn.model.UserModel;
 import com.thaithong.datn.model.UserRequestModel;
+import com.thaithong.datn.repository.CreditCardRepository;
+import com.thaithong.datn.repository.NotificationRepository;
+import com.thaithong.datn.repository.UserRepository;
 import com.thaithong.datn.utils.CustomErrorException;
 import com.thaithong.datn.utils.ErrorObject;
 import com.thaithong.datn.utils.StaticVariable;
@@ -16,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -67,6 +73,18 @@ public class AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private CreditCardRepository cardRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
+
     /**
      * ユーザーを作成
      *
@@ -91,15 +109,44 @@ public class AuthService {
             entity.setPhoneNumber(user.getPhoneNumber());
             entity.setName(user.getName());
 
+            // create credit card
+            var cardEntity = new CreditCardEntity();
+            cardEntity.setBalance(0.0);
+            cardEntity.setCardNumber(UUID.randomUUID().toString());
+            cardEntity.setExpDate(generateExpirationDate());
+            cardRepository.save(cardEntity);
+
             // set role
             if (user.getRole().equals(AccountRole.ROLE_TEACHER.name())) {
                 entity.setIsAuthorized(false);
+                entity.setIdentification(user.getIdentification());
+                entity.setStudentCard(user.getStudentCard());
+                entity.setCollegeDegree(user.getCollegeDegree());
             }
             var roleEntities = new ArrayList<RoleEntity>();
             var role = roleService.getRole(AccountRole.valueOf(user.getRole()));
             roleEntities.add(role);
             entity.setAccountRoles(roleEntities);
-            userService.saveUser(entity);
+            entity.setCreditCardEntity(cardEntity);
+            var userTemp = userRepository.save(entity);
+
+            if (role.getRole().equals(AccountRole.ROLE_TEACHER)) {
+                // send notification to admin if user role teacher
+                var adminList = userRepository.findByAccountRoles_Role(AccountRole.ROLE_ADMIN);
+                var listNotify = new ArrayList<NotificationEntity>();
+                for (var u : adminList) {
+                    var notify = new NotificationEntity();
+                    notify.setIsRead(false);
+                    notify.setSenderName(entity.getName());
+                    notify.setSenderId(userTemp.getId());
+                    notify.setReceiverId(u.getId());
+                    notify.setReceiverName(u.getName());
+                    notify.setContent("You have 1 requirement to activate your account.");
+                    listNotify.add(notify);
+                    simpMessagingTemplate.convertAndSend("/user/" + u.getId() + "/notify", notify);
+                }
+                notificationRepository.saveAll(listNotify);
+            }
 
             // create token active account
             // send email
@@ -124,7 +171,7 @@ public class AuthService {
         try {
             var user = userService.findByEmail(authenticationRequest.getEmail());
             authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword(), user);
-            checkIsAuthorizedAndIsActivated (user);
+            checkIsAuthorizedAndIsActivated(user);
             var userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
             var token = jwtTokenUtil.generateToken(getUserModel(userDetails, user));
             var jwtAuthToken = new Cookie(StaticVariable.SECURE_COOKIE, token);
@@ -199,7 +246,7 @@ public class AuthService {
                     sendEmailWithToken(ac.getEmail(), ac.getToken(), "Re-Send Token!");
                     return ResponseEntity.status(HttpStatus.OK).body(new ErrorObject("200", "Re-Send Token"));
                 } else {
-                    ac.setToken(null);
+                    //ac.setToken(null);
                     ac.setIsActivated(true);
                 }
                 userService.saveUser(ac);
@@ -224,7 +271,7 @@ public class AuthService {
         mailMessage.setTo(email);
         mailMessage.setSubject(String.format("%s", subject));
         mailMessage.setText("To confirm your account, please click here : "
-                + "http://localhost/api/auth/active-account?token=" + token);
+                + "http://localhost:3000/active-account/" + token);
         sender.send(mailMessage);
     }
 
@@ -260,7 +307,7 @@ public class AuthService {
      *
      * @return 締め切り日時
      */
-    private Date generateExpirationDate() {
+    public Date generateExpirationDate() {
         return new Date(System.currentTimeMillis() + 864000000);
     }
 
@@ -278,10 +325,6 @@ public class AuthService {
             throw new CustomErrorException(HttpStatus.BAD_REQUEST, new ErrorObject("E400001", "phonenumber can not be null"));
     }
 
-    /**
-     * @param authorizationHeader
-     * @return
-     */
     public ResponseEntity<?> fetchUser(UserRequestModel authorizationHeader) {
         UserModel user = null;
         if (StringUtils.hasText(authorizationHeader.getJwt()) && authorizationHeader.getJwt().startsWith("Token ")) {
