@@ -58,7 +58,7 @@ export default function Notification() {
 
     let onSubscribeNotification = () => {
         if (user && stompClient != null && stompClient.connected) {
-            let sub = stompClient.subscribe('/user/' + user.id + '/reply', onNotifyReceived);
+            let sub = stompClient.subscribe('/user/' + user.id + '/notify', onNotifyReceived);
             setSubscribe({...sub});
             console.log(subscribeWs)
         }

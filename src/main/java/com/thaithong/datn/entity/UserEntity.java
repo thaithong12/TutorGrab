@@ -11,7 +11,6 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
@@ -88,7 +87,7 @@ public class UserEntity extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<UserAssignment> userAssignments;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "creditcard_id", referencedColumnName = "id")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "creditcard_id")
     private CreditCardEntity creditCardEntity;
 }

@@ -106,7 +106,7 @@ public class MessageService {
                 notification.setSenderName(senderInfo.getName());
                 notification.setReceiverId(dto.getReceiverId());
                 var temp = notificationService.saveNotify(notification);
-                simpMessagingTemplate.convertAndSend("/user/" + dto.getReceiverId() + "/reply", temp);
+                simpMessagingTemplate.convertAndSend("/user/" + dto.getReceiverId() + "/notify", temp);
             }
         }
     }

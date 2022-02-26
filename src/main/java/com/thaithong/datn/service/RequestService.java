@@ -1,11 +1,12 @@
 package com.thaithong.datn.service;
 
-import com.thaithong.datn.entity.NotificationEntity;
-import com.thaithong.datn.entity.RequestEntity;
+import com.thaithong.datn.entity.*;
 import com.thaithong.datn.enums.DifficultType;
+import com.thaithong.datn.enums.PaymentStatus;
 import com.thaithong.datn.model.RequestForAssignmentModel;
 import com.thaithong.datn.model.RequestListUserResponseModel;
 import com.thaithong.datn.repository.AssignmentRepository;
+import com.thaithong.datn.repository.CreditCardRepository;
 import com.thaithong.datn.repository.RequestRepository;
 import com.thaithong.datn.repository.UserAssignmentRepository;
 import com.thaithong.datn.utils.CustomErrorException;
@@ -17,9 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class RequestService {
@@ -43,6 +44,15 @@ public class RequestService {
 
     @Autowired
     private AssignmentRepository assignmentRepository;
+
+    @Autowired
+    private PaymentService paymentService;
+
+    @Autowired
+    private CreditCardRepository cardRepository;
+
+    @Autowired
+    private GroupService groupService;
 
     public List<RequestListUserResponseModel> getRequestsOfUser(Long userId) {
         var request = requestRepository.findByRequestIdAndIsDeleted(userId, false);
@@ -120,6 +130,7 @@ public class RequestService {
         return !ObjectUtils.isEmpty(requestEntity);
     }
 
+    @Transactional(rollbackOn = {Exception.class, CustomErrorException.class})
     public Object acceptRequest(RequestForAssignmentModel requestModel) {
         var ass = assignmentService.findEntityById(requestModel.getAssignmentId());
         if (ObjectUtils.isEmpty(ass)) {
@@ -127,8 +138,42 @@ public class RequestService {
                     new ErrorObject("E404001", "Not Found Assignment!!"));
         }
         // Set Ass
+        Double price = getPrice(DifficultType.valueOf(requestModel.getDifficultType()));
         ass.setDifficultType(DifficultType.valueOf(requestModel.getDifficultType()));
+        ass.setPrice(price);
         assignmentRepository.save(ass);
+
+        var depositor = userService.findById(requestModel.getRequestId());
+
+        // deduct money from the account.
+        var card = depositor.getCreditCardEntity();
+        if (price > card.getBalance() || card.getBalance() == 0) {
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400001", "Not enough money!!!Pls top up."));
+        } else {
+            var newBalance = card.getBalance() - price;
+            card.setBalance(newBalance);
+            cardRepository.save(card);
+        }
+        // send money to admin account
+        var cardAdmin = userService.findByEmail("102170302@sv2.dut.edu.vn").getCreditCardEntity();
+        if (ObjectUtils.isEmpty(cardAdmin)) {
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400001", "Admin Card cannot get !!!"));
+        } else {
+            cardAdmin.setBalance(cardAdmin.getBalance() + price);
+            cardRepository.save(cardAdmin);
+        }
+        // create new payment
+        var payment = new PaymentEntity();
+        payment.setAssignment(ass);
+        payment.setRecipientId(requestModel.getResponseId());
+        payment.setDepositorId(requestModel.getRequestId());
+        payment.setStatus(PaymentStatus.PROCESSING);
+        if (!ObjectUtils.isEmpty(depositor.getCreditCardEntity())) {
+            payment.setCreditCard(depositor.getCreditCardEntity());
+        }
+        paymentService.savePayment(payment);
 
         // Set Response Id
         var userAss = userAssignmentRepository
@@ -149,6 +194,19 @@ public class RequestService {
                 }
             });
         }
+
+        var userList = new ArrayList<UserEntity>();
+        userList.add(userService.findById(userAss.getRequestId()));
+        userList.add(userService.findById(userAss.getResponseId()));
+        // create new chat group
+        var groupEntity = new GroupEntity();
+        groupEntity.setIsClosed(false);
+        groupEntity.setAssignmentEntity(ass);
+        groupEntity.setUrl("");
+        groupEntity.setName("");
+        groupEntity.setUsers(userList);
+        groupEntity.setUserId(userAss.getRequestId());
+
         return null;
     }
 
@@ -172,13 +230,13 @@ public class RequestService {
         return null;
     }
 
-    public Double getPrice (DifficultType type) {
+    public Double getPrice(DifficultType type) {
         double value = 0;
         switch (type) {
-            case EASY:
+            case VERY_EASY:
                 value = 1000;
                 break;
-            case VERY_EASY:
+            case EASY:
                 value = 2000;
                 break;
             case NORMAL:

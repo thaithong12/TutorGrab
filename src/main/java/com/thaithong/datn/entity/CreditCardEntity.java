@@ -12,7 +12,6 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "creadit_cards")
 @AllArgsConstructor

@@ -32,7 +32,8 @@ public class UserAssignment extends BaseEntity {
     @Column(name = "response_id")
     private Long responseId;
 
-    private Double rate;
+    @Column(name = "rate")
+    private Integer rate;
 
     @Column(name = "is_completed")
     private Boolean isCompleted;

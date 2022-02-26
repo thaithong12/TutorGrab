@@ -290,3 +290,12 @@
 .dropdown:hover span {
     border-bottom: 2px solid white;
 }
+
+#time-left-tbl {
+    z-index: 2;
+    border: 1px solid black;
+}
+
+#time-left-tbl table th td{
+    padding: 10px;
+}

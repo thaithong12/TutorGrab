@@ -113,8 +113,9 @@ export default function Register() {
                     setIsLoading(false);
                 }).catch(error => {
                     if (error.response) {
-                        toast.error(error.response.data.message.toUpperCase(), () => {
-                        });
+                        // toast.error(error.response.data.message.toUpperCase(), () => {
+                        // });
+                        console.log(error.response);
                     } else {
                         console.log(error);
                     }

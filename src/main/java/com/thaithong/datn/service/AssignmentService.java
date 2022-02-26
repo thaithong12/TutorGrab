@@ -2,13 +2,12 @@ package com.thaithong.datn.service;
 
 import com.thaithong.datn.entity.AssignmentEntity;
 import com.thaithong.datn.entity.UserAssignment;
+import com.thaithong.datn.enums.PaymentStatus;
 import com.thaithong.datn.model.AssignmentRequestModel;
 import com.thaithong.datn.model.AssignmentResponseModel;
+import com.thaithong.datn.model.ReviewAssignmentRequestModel;
 import com.thaithong.datn.model.SubjectResponseModel;
-import com.thaithong.datn.repository.AssignmentRepository;
-import com.thaithong.datn.repository.RequestRepository;
-import com.thaithong.datn.repository.SubjectRepository;
-import com.thaithong.datn.repository.UserAssignmentRepository;
+import com.thaithong.datn.repository.*;
 import com.thaithong.datn.utils.CustomErrorException;
 import com.thaithong.datn.utils.ErrorObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +17,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -38,6 +36,18 @@ public class AssignmentService {
 
     @Autowired
     private RequestRepository requestRepository;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private CreditCardRepository cardRepository;
+
+    @Autowired
+    private GroupService groupService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     /**
      * @return すべて問題を返却
@@ -91,15 +101,15 @@ public class AssignmentService {
             userAssignments.stream()
                     .map(UserAssignment::getAssignment)
                     .collect(Collectors.toList()).forEach(item -> {
-                var temp = convertEntityToResponseModel(item);
-                temp.setRequestId(userAssignments.get(i.get()).getRequestId());
-                temp.setResponseId(userAssignments.get(i.get()).getResponseId());
-                temp.setRate(userAssignments.get(i.get()).getRate());
-                temp.setReason(userAssignments.get(i.get()).getReason());
-                listReturn.add(temp);
+                        var temp = convertEntityToResponseModel(item);
+                        temp.setRequestId(userAssignments.get(i.get()).getRequestId());
+                        temp.setResponseId(userAssignments.get(i.get()).getResponseId());
+                        temp.setRate(userAssignments.get(i.get()).getRate());
+                        temp.setReason(userAssignments.get(i.get()).getReason());
+                        listReturn.add(temp);
 
-                i.incrementAndGet();
-            });
+                        i.incrementAndGet();
+                    });
         }
         return listReturn;
     }
@@ -179,7 +189,7 @@ public class AssignmentService {
             ass.setIsDeleted(false);
             ass.setGrade(requestModel.getGrade());
             ass.setTextContent(requestModel.getTextContent());
-            int randomNumber = (int)(Math.random()*(100000-10000+1)+10000);
+            int randomNumber = (int) (Math.random() * (100000 - 10000 + 1) + 10000);
             ass.setAssignmentUrl("ASS" + randomNumber);
 
             var subject = subjectRepository.findByName(requestModel.getSubject());
@@ -261,6 +271,7 @@ public class AssignmentService {
         return listReturn;
     }
 
+    @Transactional(rollbackOn = {Exception.class, CustomErrorException.class})
     public AssignmentResponseModel updateAnswerAssignment(Long id, AssignmentRequestModel requestModel) {
         var assEntity = assignmentRepository.findById(id);
         if (assEntity.isEmpty()) {
@@ -272,15 +283,133 @@ public class AssignmentService {
         obj.setAnswer(requestModel.getAnswer());
 
         obj = assignmentRepository.save(obj);
+
+        // new thread
+        TimerTask task = new TimerTask() {
+            @Transactional(rollbackOn = {Exception.class, CustomErrorException.class})
+            public void run() {
+                var assEntity = assignmentRepository.findById(id);
+                var payment = paymentService.findByAssignmentId(id).get(0);
+                boolean check =
+                        assEntity.get().getIsAnswered()
+                                && payment.getStatus().equals(PaymentStatus.PROCESSING);
+                var cardAdmin = userService.findByEmail("102170302@sv2.dut.edu.vn").getCreditCardEntity();
+                if (check) {
+                    // process payment status
+                    payment.setStatus(PaymentStatus.DONE);
+                    paymentService.savePayment(payment);
+
+                    // process card admin
+                    cardAdmin.setBalance(cardAdmin.getBalance() - assEntity.get().getPrice());
+                    cardRepository.save(cardAdmin);
+
+                    // update user assignment
+                    var userAss = userAssignmentRepository.findByAssignmentId(id);
+                    userAss.setIsCompleted(true);
+                    userAssignmentRepository.save(userAss);
+
+                    // process money for recepient
+                    var recipient = userService.findById(userAss.getResponseId());
+                    var recipientCard = recipient.getCreditCardEntity();
+                    recipientCard.setBalance(recipientCard.getBalance() + assEntity.get().getPrice());
+                    cardRepository.save(recipientCard);
+                }
+            }
+        };
+        Timer timer = new Timer("Timer");
+        long delay = 86400000L;
+        timer.schedule(task, delay);
+
         return convertEntityToResponseModel(obj);
     }
 
-    public AssignmentEntity findEntityById (Long id) {
+    public AssignmentEntity findEntityById(Long id) {
         var assEntity = assignmentRepository.findById(id);
         if (assEntity.isEmpty()) {
             throw new CustomErrorException(HttpStatus.BAD_REQUEST,
                     new ErrorObject("E400001", "Cannot update this assignment!"));
         }
         return assEntity.get();
+    }
+
+    @Transactional(rollbackOn = {Exception.class, CustomErrorException.class})
+    public Object updateReviewAssignment(Long id, ReviewAssignmentRequestModel requestModel) {
+        var assEntity = assignmentRepository.findById(id);
+        if (assEntity.isEmpty()) {
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400001", "Cannot update this assignment!"));
+        }
+        var obj = assEntity.get();
+        var userAss = obj.getUserAssignments();
+        var objUserAss = userAss.stream().filter(item -> item.getResponseId() == requestModel.getResponseId()).findFirst().orElse(null);
+        var cardAdmin = userService.findByEmail("102170302@sv2.dut.edu.vn").getCreditCardEntity();
+        var payment = paymentService.findByAssignmentId(id).get(0);
+        if (ObjectUtils.isEmpty(cardAdmin)) {
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400001", "Admin Card cannot get !!!"));
+        }
+        if (Objects.isNull(objUserAss)) {
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400001", "Cannot update this assignment!"));
+        } else {
+            if (requestModel.getIsAccepted()) {
+                objUserAss.setIsCompleted(true);
+                objUserAss.setRate(requestModel.getRate());
+
+                // process money
+                var recipient = userService.findById(requestModel.getResponseId());
+                var recipientCard = recipient.getCreditCardEntity();
+                recipientCard.setBalance(recipientCard.getBalance() + assEntity.get().getPrice());
+
+                cardRepository.save(recipientCard);
+            } else {
+                var requestEntity = requestRepository
+                        .findByAssignmentEntity_IdAndResponseId(assEntity.get().getId(), requestModel.getResponseId());
+                if (getDateDiff(requestEntity.getUpdatedAt(), new Date(), TimeUnit.MINUTES) < 30) {
+                    throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                            new ErrorObject("E400001", "Cannot reject now!!!!"));
+                }
+                objUserAss.setIsRejected(true);
+                objUserAss.setReason(requestModel.getReason());
+
+                // process money
+                var depositor = userService.findById(requestModel.getRequestId());
+                var depositorCard = depositor.getCreditCardEntity();
+                depositorCard.setBalance(depositorCard.getBalance() + assEntity.get().getPrice());
+
+                cardRepository.save(depositorCard);
+            }
+            // process money admin
+            cardAdmin.setBalance(cardAdmin.getBalance() - assEntity.get().getPrice());
+            cardRepository.save(cardAdmin);
+
+            // update payment status
+            payment.setStatus(PaymentStatus.DONE);
+            paymentService.savePayment(payment);
+        }
+
+        // close chat group
+        var groupEntity = assEntity.get().getGroupEntity();
+        groupEntity.setIsClosed(true);
+        groupService.saveGroup(groupEntity);
+
+        userAssignmentRepository.save(objUserAss);
+        return getAssignment(id);
+    }
+
+    public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
+        long diffInMillis = date2.getTime() - date1.getTime();
+        return timeUnit.convert(diffInMillis, TimeUnit.MINUTES);
+    }
+
+    public Object updatePublishedAssignment(Long id, AssignmentRequestModel requestModel) {
+        var assEntity = assignmentRepository.findById(id);
+        if (assEntity.isEmpty()) {
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400001", "Cannot update this assignment!"));
+        }
+        assEntity.get().setIsPublished(requestModel.getIsPublished());
+
+        return convertEntityToResponseModel(assignmentRepository.save(assEntity.get()));
     }
 }

@@ -50,7 +50,7 @@ public class GroupService {
         //groupResponseModel.setUserId(groupEntity.getCreatedBy());
         groupResponseModel.setIsClosed(groupEntity.getIsClosed());
 
-        groupResponseModel.setAssignment(assignmentService.getAssignment(groupEntity.getAssignmentId()));
+        groupResponseModel.setAssignment(assignmentService.getAssignment(groupEntity.getAssignmentEntity().getId()));
         groupResponseModel.setUserId(groupEntity.getUserId());
 
         var users = groupEntity.getUsers().stream().map(
@@ -107,5 +107,9 @@ public class GroupService {
 
     public Optional<GroupEntity> findById(Long groupId) {
         return groupRepository.findById(groupId);
+    }
+
+    public GroupEntity saveGroup (GroupEntity g) {
+        return groupRepository.save(g);
     }
 }

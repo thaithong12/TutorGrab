@@ -74,12 +74,12 @@ export default function RequestSolved() {
     }
 
     const processRequest = () => {
-        console.log(currentRequest);
+        //console.log(currentRequest);
         if (currentRequest.isAccepted) {
             dispatch(acceptRequestForAssignment(currentRequest.data.assignmentId,
                 currentRequest.data.responseId, currentRequest.data.requestId, currentRequest.data.difficultType))
         } else {
-            console.log('Vao day chua nhỉ')
+            //console.log('Vao day chua nhỉ')
             dispatch(rejectRequestForAssignment(currentRequest.data.assignmentId,
                 currentRequest.data.responseId, currentRequest.data.requestId)).then(res => {
                     //fetchDataUser();

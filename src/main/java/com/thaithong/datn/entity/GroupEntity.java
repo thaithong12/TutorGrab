@@ -7,13 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -24,9 +18,6 @@ import java.util.List;
 @Getter
 @Setter
 public class GroupEntity extends BaseEntity {
-    @Column(name = "assginment_id")
-    private Long assignmentId;
-
     private String name;
 
     private String url;
@@ -35,6 +26,10 @@ public class GroupEntity extends BaseEntity {
      * administratorId
      */
     private Long userId;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "assginment_id")
+    private AssignmentEntity assignmentEntity;
 
     @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
     private List<UserEntity> users;

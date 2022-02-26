@@ -43,6 +43,9 @@ public class AssignmentEntity extends BaseEntity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String answer;
 
+    @Column(name = "price")
+    private Double price;
+
     @Column(name = "is_published")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isPublished;
@@ -67,4 +70,7 @@ public class AssignmentEntity extends BaseEntity {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assignmentEntity")
     private List<RequestEntity> requestEntities;
+
+    @OneToOne(mappedBy = "assignmentEntity")
+    private GroupEntity groupEntity;
 }

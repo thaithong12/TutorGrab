@@ -50,6 +50,8 @@ public class UserResponseModel {
 
     private Date createdAt;
 
+    private Double balance;
+
     private Boolean isBlocked;
 
     private List<String> roles;

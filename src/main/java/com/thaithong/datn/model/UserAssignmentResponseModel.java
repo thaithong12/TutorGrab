@@ -31,7 +31,7 @@ public class UserAssignmentResponseModel {
      */
     private Long responseId;
 
-    private Double rate;
+    private Integer rate;
 
     private Boolean isCompleted;
 

@@ -40,7 +40,7 @@ public class AssignmentResponseModel {
 
     private String content;
 
-    private Double rate;
+    private Integer rate;
 
     private String grade;
 

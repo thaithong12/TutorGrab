@@ -171,7 +171,7 @@ export default function SingleAssignment() {
         window.location.reload();
     }
 
-    async function handleSendAnswer(event) {
+    function handleSendAnswer(event) {
         event.preventDefault();
         if (answer == '') {
             toast.error("Answer must not be null!!", () => {
@@ -179,8 +179,9 @@ export default function SingleAssignment() {
             return;
         }
         assignmentReq.answer = answer;
-        dispatch(updateAnswerAssignment(assignmentReq));
-        await fetchData();
+        dispatch(updateAnswerAssignment(assignmentReq)).then(res => {
+            fetchData();
+        });
     }
 
     function changeDifficultType(event) {

@@ -4,9 +4,10 @@ import com.thaithong.datn.entity.RoleEntity;
 import com.thaithong.datn.entity.UserAssignment;
 import com.thaithong.datn.entity.UserEntity;
 import com.thaithong.datn.enums.AccountRole;
-import com.thaithong.datn.enums.MessageType;
-import com.thaithong.datn.enums.TransportAction;
-import com.thaithong.datn.model.*;
+import com.thaithong.datn.model.CKFileResponse;
+import com.thaithong.datn.model.UserAssignmentResponseModel;
+import com.thaithong.datn.model.UserRequestModel;
+import com.thaithong.datn.model.UserResponseModel;
 import com.thaithong.datn.repository.UserAssignmentRepository;
 import com.thaithong.datn.repository.UserRepository;
 import com.thaithong.datn.utils.CustomErrorException;
@@ -66,6 +67,14 @@ public class UserService {
 
     public void saveUser(UserEntity u) {
         userRepository.save(u);
+    }
+
+    public UserEntity findById(Long id) {
+        var user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            throwNotFoundException(id, user);
+        }
+        return user.get();
     }
 
     public UserEntity findByEmail(String email) {
@@ -334,7 +343,7 @@ public class UserService {
         return userRepository.getNameByUserId(id);
     }
 
-    public List<UserResponseModel> getAllTeacherUsers () {
+    public List<UserResponseModel> getAllTeacherUsers() {
         var listUser = userRepository.findByAccountRoles_Role(AccountRole.ROLE_TEACHER);
         var listReturn = new ArrayList<UserResponseModel>();
         if (!CollectionUtils.isEmpty(listUser)) {
