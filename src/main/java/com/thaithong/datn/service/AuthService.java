@@ -111,7 +111,7 @@ public class AuthService {
 
             // create credit card
             var cardEntity = new CreditCardEntity();
-            cardEntity.setBalance(0.0);
+            cardEntity.setBalance(1000.0);
             cardEntity.setCardNumber(UUID.randomUUID().toString());
             cardEntity.setExpDate(generateExpirationDate());
             cardRepository.save(cardEntity);
@@ -330,6 +330,10 @@ public class AuthService {
         if (StringUtils.hasText(authorizationHeader.getJwt()) && authorizationHeader.getJwt().startsWith("Token ")) {
             String jwt = authorizationHeader.getJwt().substring(6);
             user = jwtUtil.getUserFromToken(jwt);
+            if (!ObjectUtils.isEmpty(user)) {
+                var entity = userService.findById(user.getUserId());
+                return ResponseEntity.ok(userMapper.toUserResponseModel(entity));
+            }
         }
         return ResponseEntity.ok(user);
     }

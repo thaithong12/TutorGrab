@@ -53,12 +53,15 @@ export default function RequestSolved() {
         await axios.post(API_URL + '/auth/fetch', {jwt: jwtStr}).then(res => {
             if (res.data) {
                 setUser({...res.data});
-                dispatch(getAllRequestForEachAssignmentOfUser(res.data.userId));
+                console.log(res.data)
+                dispatch(getAllRequestForEachAssignmentOfUser(res.data.id));
             }
         }).catch(err => {
             console.log(err);
         })
     }
+
+    console.log(requestSolvedList);
 
     function formatCurrency(value) {
         return value.toLocaleString('it-IT', {style: 'currency', currency: 'VND'});

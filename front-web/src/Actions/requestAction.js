@@ -51,6 +51,9 @@ export const acceptRequestForAssignment = (assignmentId, responseId, requestId, 
             dispatch(getAllRequestForEachAssignmentOfUser(data.requestId));
         }).catch(err => {
             console.log(err.response.data);
+            if (err.response.status === 400) {
+                toast.error(err.response.data.message,() => {})
+            }
         })
     }
 }

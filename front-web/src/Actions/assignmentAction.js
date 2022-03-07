@@ -38,10 +38,15 @@ export const updateAssignment = (assignment) => {
 export const deleteAssignment = (id) => {
     return async (dispatch) => {
         return await axios.delete(API_URL + END_POINT_ASSIGNMENT + "/" + id).then(res => {
-
+            return res;
         }).catch((error) => {
-            toast.error(error.response.data.message.toUpperCase(), () => {
-            });
+            if (error.response.status === 400) {
+                toast.error(error.response.data.message.toUpperCase(), () => {
+                });
+            } else {
+                console.log(error);
+            }
+            return error;
         });
     }
 }

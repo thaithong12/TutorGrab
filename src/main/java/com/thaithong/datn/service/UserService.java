@@ -253,6 +253,8 @@ public class UserService {
             uResponse.setName(user.get().getName());
             obj.setResponseInfo(uResponse);
         }
+        var totalAnswered = userAssignmentRepository.getTotalAnsweredOfUser(e.getResponseId());
+        obj.setTotalAnswered(totalAnswered);
         return obj;
     }
 

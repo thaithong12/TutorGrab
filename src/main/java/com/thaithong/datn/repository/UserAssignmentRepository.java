@@ -43,4 +43,8 @@ public interface UserAssignmentRepository extends CrudRepository<UserAssignment,
     UserAssignment findByRequestIdAndAssignmentId(Long responseId , Long assignmentId);
 
     UserAssignment findByAssignmentId(Long assignmentId);
+
+    @Query(value = "SELECT COUNT(*) FROM user_assginments \n" +
+            "WHERE user_assginments.response_id = ?1", nativeQuery = true)
+    int getTotalAnsweredOfUser (Long userId);
 }

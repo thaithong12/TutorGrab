@@ -75,8 +75,10 @@ export default function MyAssignment() {
     function handleDeleteAss(event) {
         event.preventDefault();
         dispatch(deleteAssignment(currentAssId)).then(res => {
-            toast.success('Delete assignment success!', () => {
-            });
+            if (res.status === 204) {
+                toast.success('Delete assignment success!', () => {
+                });
+            }
             dispatch(getAssignmentsOfUser(user.id, "putter"))
             close();
         })
@@ -150,7 +152,7 @@ export default function MyAssignment() {
                                         <HourglassEmptyTwoToneIcon style={{fill: "#1976d2"}}/>}</TableCell>
                                     <TableCell align="center">{assignment.isAnswered ?
                                         <CheckCircleOutlineOutlinedIcon style={{fill: "green"}}/> :
-                                        <CancelOutlinedIcon style={{fill: "red"}}/>}</TableCell>
+                                        <HourglassEmptyTwoToneIcon style={{fill: "#1976d2"}}/>}</TableCell>
                                     <TableCell align="center">
                                         {assignment.isAnswered ?
                                             (assignment.rate === null && !assignment.isRejected ?

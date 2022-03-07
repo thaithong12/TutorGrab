@@ -80,7 +80,8 @@ public class AssignmentService {
 //        var listRequest = requestRepository.findByAssignmentId(id);
         var listRequest = requestRepository.findByAssignmentEntity_Id(id);
         if (!CollectionUtils.isEmpty(listRequest)) {
-            return;
+            throw new CustomErrorException(HttpStatus.BAD_REQUEST,
+                    new ErrorObject("E400001", "Cannot Delete this Assignment!"));
         }
         //ass.setIsDeleted(true);
         //assignmentRepository.save(ass);
