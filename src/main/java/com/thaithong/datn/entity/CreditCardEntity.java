@@ -13,14 +13,12 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "creadit_cards")
+@Table(name = "credit_cards")
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
 public class CreditCardEntity extends BaseEntity {
-    private String name;
-
     @Column(name = "card_number")
     private String cardNumber;
 

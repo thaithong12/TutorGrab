@@ -34,6 +34,7 @@ public class UserMapper {
         userDTO.setId(userEntity.getId());
         userDTO.setName(userEntity.getName());
         userDTO.setEmail(userEntity.getEmail());
+        userDTO.setBalance(userEntity.getCreditCardEntity().getBalance());
 
         // userDTO.setWsToken(userEntity.getWsToken());
         // Global role

@@ -39,5 +39,7 @@ public class UserAssignmentResponseModel {
 
     private String reason;
 
+    private int totalAnswered;
+
     private UserResponseModel responseInfo;
 }

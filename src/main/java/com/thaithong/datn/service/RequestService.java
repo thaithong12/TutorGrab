@@ -21,6 +21,7 @@ import org.springframework.util.ObjectUtils;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class RequestService {
@@ -206,6 +207,33 @@ public class RequestService {
         groupEntity.setName("");
         groupEntity.setUsers(userList);
         groupEntity.setUserId(userAss.getRequestId());
+        groupEntity.setUrl(UUID.randomUUID().toString());
+        var requestUser = userService.findById(requestModel.getRequestId());
+        var responseUser = userService.findById(requestModel.getResponseId());
+        var listUsers = new ArrayList<UserEntity>();
+        listUsers.add(requestUser);
+        listUsers.add(responseUser);
+        groupEntity.setUsers(listUsers);
+
+        var tempGroup = groupService.saveGroup(groupEntity);
+        var tempGroupRequestUser = requestUser.getGroups();
+        var tempGroupResponseUser = responseUser.getGroups();
+        if (CollectionUtils.isEmpty(tempGroupRequestUser)) {
+            var groups = new ArrayList<GroupEntity>();
+            groups.add(tempGroup);
+            requestUser.setGroups(groups);
+        } else {
+            tempGroupRequestUser.add(tempGroup);
+        }
+        if (CollectionUtils.isEmpty(tempGroupResponseUser)) {
+            var groups = new ArrayList<GroupEntity>();
+            groups.add(tempGroup);
+            responseUser.setGroups(groups);
+        } else {
+            tempGroupResponseUser.add(tempGroup);
+        }
+        userService.saveUser(requestUser);
+        userService.saveUser(responseUser);
 
         return null;
     }

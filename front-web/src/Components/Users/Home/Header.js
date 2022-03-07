@@ -1,16 +1,19 @@
 import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import axios from "axios";
 import {API_URL, END_POINT_FETCH_USER} from "../../../Constants/Constant";
 import {history} from "../../../Helper/history";
 import Notification from "../Notification/Notification";
+import {_fetchDataUser} from "../../../Actions/authAction";
 
 export default function Header() {
     const [curUrl, setCurUrl] = useState({url: '/home'});
     useEffect(() => {
         setCurUrl({...curUrl, url: window.location.href});
     }, []);
+
+    const dispatch = useDispatch();
 
     let user = useSelector(state => state.user.user);
 
@@ -27,7 +30,10 @@ export default function Header() {
             };
             await axios.post(API_URL + END_POINT_FETCH_USER, data).then(res => {
                 if (res.data) {
-                    setUser({...res.data, loggedIn: true})
+                    setUser({...res.data, loggedIn: true});
+                    dispatch(_fetchDataUser({...res.data, loggedIn: true}))
+                    //localStorage.removeItem("user");
+                    localStorage.setItem("user", JSON.stringify({loggedIn: true, ...res.data}));
                 } else if (!localStorage.getItem("Authorization")) {
                     history.push('/sign-in');
                 }
@@ -111,7 +117,7 @@ export default function Header() {
                                                     <Link
                                                         to={isHaveRoleAdmin() ? '/admin': '#'}
                                                         className="nav-link"
-                                                        tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html">Hello {user.email}</Link>
+                                                        tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html">Hello {user.email} ({user.balance ? user.balance : '0'}đ)</Link>
 
                                                     <Link to="/logout" onClick={handleLogout}
                                                           tppabs="https://preview.colorlib.com/theme/tutor/testimonials.html"

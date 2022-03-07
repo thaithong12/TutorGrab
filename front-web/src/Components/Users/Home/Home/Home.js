@@ -120,7 +120,7 @@ export default function Home() {
                                                         </p>
                                                         <p className="meta">
                                                             <span className="mr-2 mb-2 text-black">Total answered assignment </span>
-                                                            <span className="mr-2 mb-2 text-danger"><strong>200</strong></span>
+                                                            <span className="mr-2 mb-2 text-danger"><strong>{topUserState[0].totalAnswered}</strong></span>
                                                         </p>
                                                     </div>
                                                 </>
@@ -153,7 +153,7 @@ export default function Home() {
                                                                 <span className="icon-star-half-full h5"></span> : ''
                                                         }
                                                         <h3><a href="#">Total answered assignment:<strong
-                                                            className="text-danger">100</strong></a></h3>
+                                                            className="text-danger">{val.totalAnswered}</strong></a></h3>
                                                     </div>
                                                 </div>
                                             )) : ''
@@ -228,7 +228,7 @@ export default function Home() {
                                 <form action="#" className="d-flex search-form">
                                     <span className="icon-"></span>
                                     <input onChange={(e) => handleChangeTextSearch(e)} type="search"
-                                           className="form-control mr-2" placeholder="Search subjects"/>
+                                           className="form-control mr-2" placeholder="Search Assignment"/>
                                     <input disabled={true} type="submit" className="btn btn-primary px-4"
                                            value="Search"/>
                                 </form>
@@ -277,7 +277,7 @@ export default function Home() {
                                                              className="btn btn-primary custom-btn">View</Link></p>
                                                 </div>
                                             </div>
-                                        )) : <h1>No have data yet.</h1>
+                                        )) : <h1>No data available at the moment</h1>
                                 }
 
                                 <div className="custom-pagination">
@@ -299,23 +299,23 @@ export default function Home() {
                             </div>
                             <div className="col-lg-4">
                                 <div className="box-side mb-3">
-                                    <a href="#"><img src="ximg_1_horizontal.jpg.pagespeed.ic.V8yJdSbNBp.jpg"
+                                    <a href="#"><img src="http://www.appcoda.com/wp-content/uploads/2015/04/react-native.png"
                                                      tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_1_horizontal.jpg.pagespeed.ic.V8yJdSbNBp.jpg"
                                                      alt="Image" className="img-fluid"/></a>
                                     <h3><a href="#">Learning React Native</a></h3>
                                 </div>
                                 <div className="box-side mb-3">
-                                    <a href="#"><img src="ximg_2_horizontal.jpg.pagespeed.ic.LvigFoa0jF.jpg"
+                                    <a href="#"><img src="https://www.anerbarrena.com/wp-content/uploads/2016/05/logo-programacion.jpg"
                                                      tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_2_horizontal.jpg.pagespeed.ic.LvigFoa0jF.jpg"
                                                      alt="Image" className="img-fluid"/></a>
-                                    <h3><a href="#">Learning React Native</a></h3>
+                                    <h3><a href="#">Learning PHP</a></h3>
                                 </div>
                                 <div className="box-side">
-                                    <a href="#"><img src="img_3_horizontal.jpg"
+                                    <a href="#"><img src="https://www.thoughtco.com/thmb/v7VCjPoXqc8C6GtI4HApY9A_gBc=/4321x2419/filters:fill(auto,1)/what-is-java-5b4bda1cc9e77c0037171617.jpg"
                                                      tppabs="https://preview.colorlib.com/theme/tutor/images/img_3_horizontal.jpg"
                                                      alt="Image"
                                                      className="img-fluid"/></a>
-                                    <h3><a href="#">Learning React Native</a></h3>
+                                    <h3><a href="#">Learning JAVA</a></h3>
                                 </div>
                             </div>
                         </div>

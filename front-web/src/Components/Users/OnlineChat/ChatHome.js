@@ -67,6 +67,7 @@ export default function ChatHome() {
             if (user) {
                 return await axios.get(API_URL + END_POINT_FETCH_ALL_GROUP + user.id).then(res => {
                     dispatch(_wsFetchAllSortedGroup([...res.data]));
+                    console.log(res.data);
                     let usersTemp = [];
                     for (let grp of res.data) {
                         Array.prototype.push.apply(usersTemp, grp.users);
