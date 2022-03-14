@@ -11,6 +11,8 @@ import {getAssignmentsOfUser} from "../../../../../../Actions/assignmentAction";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import {Rating} from "@mui/material";
+import {Link} from "react-router-dom";
+import HourglassEmptyTwoToneIcon from "@mui/icons-material/HourglassEmptyTwoTone";
 
 export function CompletedAssignment() {
     const user = useSelector(state => state.user.user);
@@ -23,6 +25,8 @@ export function CompletedAssignment() {
             dispatch(getAssignmentsOfUser(user.id, "solver"))
         }
     }, []);
+
+    console.log(assignments)
 
     return (
         <TableContainer component={Paper}>
@@ -50,7 +54,7 @@ export function CompletedAssignment() {
                                 >
                                     {/*<TableCell align="left">{index + 1}</TableCell>*/}
                                     <TableCell style={{color: "blue"}}
-                                               align="left">#{row.assignmentUrl}</TableCell>
+                                               align="left"><Link to={'/assignments/' + row.id}>#{row.assignmentUrl}</Link></TableCell>
                                     <TableCell style={{color: "black"}}
                                                align="left">{row.title}</TableCell>
                                     <TableCell style={{color: "black"}}
@@ -61,9 +65,10 @@ export function CompletedAssignment() {
                                                align="left">{row.difficultType}</TableCell>
                                     <TableCell style={{color: "black"}}
                                                align="left">
-                                        {row.isAnswered ?
+                                        {row.isAnswered && row.isCompleted?
                                             <CheckCircleOutlineOutlinedIcon style={{fill: "green"}}/> :
-                                            <CancelOutlinedIcon style={{fill: "red"}}/>}
+                                            (!row.isRejected ? <HourglassEmptyTwoToneIcon style={{fill: "#1976d2"}}/> :
+                                            <CancelOutlinedIcon style={{fill: "red"}}/>)}
                                     </TableCell>
                                     <TableCell style={{color: "black"}}
                                                align="left">

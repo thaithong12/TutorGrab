@@ -240,6 +240,7 @@ public class AssignmentService {
         ass.setRate(assRelation.getRate());
         ass.setIsRejected(assRelation.getIsRejected());
         ass.setReason(assRelation.getReason());
+        ass.setIsCompleted(assRelation.getIsCompleted());
         if (!Objects.isNull(assignmentEntity.getSubject())) {
             var subj = new SubjectResponseModel();
             subj.setId(assignmentEntity.getSubject().getId());

@@ -27,7 +27,10 @@ export const createAssignment = (assignment) => {
 export const updateAssignment = (assignment) => {
     return async (dispatch) => {
         return await axios.put(API_URL + END_POINT_ASSIGNMENT + "/" + assignment.id, assignment).then(res => {
-
+            if (res.status == 200) {
+                toast.success('Update assignment success!', () => {
+                });
+            }
         }).catch((error) => {
             toast.error(error.response.data.message.toUpperCase(), () => {
             });

@@ -56,6 +56,7 @@ export default function RequestSolved() {
                 console.log(res.data)
                 dispatch(getAllRequestForEachAssignmentOfUser(res.data.id));
             }
+            console.log(res);
         }).catch(err => {
             console.log(err);
         })
