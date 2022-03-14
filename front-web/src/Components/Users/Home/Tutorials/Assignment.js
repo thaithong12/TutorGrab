@@ -9,6 +9,7 @@ import {useSelector} from "react-redux";
 import {TodoAssignment} from "./MangeAssignment/Tutor/TodoAssignment";
 import {CompletedAssignment} from "./MangeAssignment/Tutor/CompletedAssignment";
 import RequestSolved from "./MangeAssignment/Student/RequestSolved";
+import ChatHome from "../../OnlineChat/ChatHome";
 
 export default function Assignment() {
     // Tab Panel Value`
@@ -26,9 +27,9 @@ export default function Assignment() {
             <div className={'site-wrap'} id={'home-section'}>
                 <Header/>
                 {/*banner start*/}
-                <div className="site-section-cover overlay" id={'site-section-cover'}>
+                <div className="site-section-cover overlay" id={'site-section-cover'} style={{minHeight: 270, height: 270}}>
                     <div className="container">
-                        <div className="row align-items-center justify-content-center">
+                        <div className="row align-items-center justify-content-center" style={{minHeight: 270, height: 270}}>
                             <div className="col-lg-10 text-center">
                                 <h1>The <strong>Hub</strong> Of <strong>Tutorials</strong></h1>
                             </div>
@@ -36,7 +37,7 @@ export default function Assignment() {
                     </div>
                 </div>
             </div>
-            <div className="site-section bg-light">
+            <div className="site-section bg-light background-tab">
                 <div className="container">
                     <Box sx={{width: '100%'}}>
                         <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
@@ -47,7 +48,7 @@ export default function Assignment() {
                                 <Tab label={user && user.roles[0] !== 'ROLE_TEACHER' ? "Request Solved" : ""}  {...a11yProps(2)} />
                             </Tabs>
                         </Box>
-                        <div style={{border: "1px solid", borderRadius: 10, marginTop: 15}}>
+                        <div style={{}} className={'background-form'}>
                             <TabPanel value={value} index={0}>
                                 {user && user.roles[0] === 'ROLE_TEACHER' ? <TodoAssignment/> : <NewAssignment/>}
                             </TabPanel>
@@ -64,6 +65,7 @@ export default function Assignment() {
                     </Box>
                 </div>
             </div>
+            <ChatHome/>
             <HomeScript/>
             <Footer/>
         </div>

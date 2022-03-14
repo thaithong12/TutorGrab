@@ -72,40 +72,30 @@ export default function NewAssignment() {
 
     function handleSubmit(event) {
         event.preventDefault();
-        setError({...initErr});
         validatedAssignment();
         if (err.isErr) {
             toast.error(err.msg.toUpperCase(), () => {
             });
             return;
         }
+        setError({...initErr});
         assignmentReq.textContent = stripHtml(assignmentReq.content);
 
         dispatch(createAssignment(assignmentReq)).then(res => {
             toast.success('Create assignment success!', () => {
             });
-            setAssignment({...initAssState});
+            resetAssignment(event);
         });
     }
 
     function validatedAssignment() {
-        if (assignmentReq.title === '') {
-            setError({...err, isErr: true, msg: 'Title cannot be null'})
-        }
-        if (assignmentReq.subject === '') {
-            setError({...err, isErr: true, msg: 'Subject cannot be null'})
-        }
-        if (assignmentReq.grade === '') {
-            setError({...err, isErr: true, msg: 'Grade cannot be null'})
-        }
         if (assignmentReq.content === '') {
-            setError({...err, isErr: true, msg: 'Content cannot be null'})
+            setError({...err, isErr: true, msg: 'Description cannot be null'})
         }
     }
-
     function handleChangeAttrAssignment(event) {
         setAssignment({...assignmentReq, [event.target.name]: event.target.value});
-        validatedAssignment();
+        //validatedAssignment();
     }
 
     function resetAssignment(event) {

@@ -20,8 +20,10 @@ public interface AssignmentRepository extends CrudRepository<AssignmentEntity, L
             "FROM\n" +
             "\t`assignments`\n" +
             "\tJOIN user_assginments ON assignments.id = user_assginments.assignment_id \n" +
+            "\t\n" +
             "WHERE\n" +
-            "\tuser_assginments.is_completed = 0 \n" +
-            "\tOR user_assginments.is_rejected = 1;", nativeQuery = true)
+            "\t(user_assginments.is_completed = 0 \n" +
+            "\tOR user_assginments.is_rejected = 1)\n" +
+            "\tAND user_assginments.response_id IS NULL;", nativeQuery = true)
     List<AssignmentEntity> findAllTodoAssignment ();
 }

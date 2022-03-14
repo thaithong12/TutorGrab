@@ -94,13 +94,13 @@ export default function SingleAssignment() {
 
     function handleSubmit(event) {
         event.preventDefault();
-        setError({...initErr});
         validatedAssignment();
         if (err.isErr) {
             toast.error(err.msg.toUpperCase(), () => {
             });
             return;
         }
+        setError({...initErr});
         dispatch(createAssignment(assignmentReq)).then(res => {
             toast.success('Create assignment success!', () => {
             });
@@ -112,17 +112,22 @@ export default function SingleAssignment() {
 
     function validatedAssignment() {
         if (assignmentReq.title === '') {
-            setError({...err, isErr: true, msg: 'Title cannot be null'})
+            setError({...err, isErr: true, msg: 'Title cannot be null'});
+            return
         }
         if (assignmentReq.subject === '') {
             setError({...err, isErr: true, msg: 'Subject cannot be null'})
+            return;
         }
         if (assignmentReq.grade === '') {
-            setError({...err, isErr: true, msg: 'Grade cannot be null'})
+            setError({...err, isErr: true, msg: 'Class cannot be null'})
+            return;
         }
         if (assignmentReq.content === '') {
             setError({...err, isErr: true, msg: 'Content cannot be null'})
+            return;
         }
+        setError({...initErr});
     }
 
     function handleChangeAttrAssignment(event) {
@@ -152,8 +157,6 @@ export default function SingleAssignment() {
         assignmentReq.textContent = stripHtml(assignmentReq.content);
 
         dispatch(updateAssignment(assignmentReq)).then(async res => {
-            toast.success('Update assignment success!', () => {
-            });
             await fetchData();
             setEdit(false);
         })
@@ -223,9 +226,9 @@ export default function SingleAssignment() {
                 <div className={'site-wrap'} id={'home-section'}>
                     <Header/>
                     {/*banner start*/}
-                    <div className="site-section-cover overlay" id={'site-section-cover'}>
+                    <div className="site-section-cover overlay" id={'site-section-cover'} style={{minHeight: 270, height: 270}}>
                         <div className="container">
-                            <div className="row align-items-center justify-content-center">
+                            <div className="row align-items-center justify-content-center" style={{minHeight: 270, height: 270}}>
                                 <div className="col-lg-10 text-center">
                                     <h1>The <strong>Hub</strong> Of <strong>Tutorials</strong></h1>
                                 </div>
@@ -239,16 +242,16 @@ export default function SingleAssignment() {
                         <i>{new Date(assignment.createdAt).toLocaleDateString("en-US", options)}</i></h6>
 
 
-                    <div className="container" style={{border: "2px solid black", borderRadius: 15}}>
+                    <div className="container" style={{backgroundColor: "white", border: "1px solid white", borderRadius: 20}}>
 
                         {
                             modeView === 1 && !isEdit ? (
                                 <>
-                                    <h3 className={'text-center'}><strong><i>{assignment.title}</i></strong></h3>
+                                    <h3 className={'text-center'} style={{color: "rgb(25, 118, 210)"}}><strong><i>{assignment.title}</i></strong></h3>
                                     <div style={{textAlign: 'left'}}>
-                                        <h5 className={'text-left'}><strong>Subject
+                                        <h5 className={'text-left'}><strong style={{color: "rgb(25, 118, 210)"}}>Subject
                                             : <i>[{assignment.subject ? assignment.subject : 'Other'}]</i></strong></h5>
-                                        <h5 className={'text-left'}><strong>Grade
+                                        <h5 className={'text-left'}><strong style={{color: "rgb(25, 118, 210)"}}>Grade
                                             : <i>[{assignment.grade && assignment.grade.length > 0 ? assignment.grade : 'Other'}]</i></strong>
                                         </h5>
                                     </div>
@@ -353,14 +356,19 @@ export default function SingleAssignment() {
                         {
                             assignment && (((assignment.requestId === user.id) && assignment.isAnswered && assignment.responseId != undefined)
                                 || (assignment.isAnswered && assignment.isPublished)) ?
-                                <div style={{textAlign: "center", padding: 5}}>
-                                    <strong>Solved: </strong>
-                                    <a href={"http://localhost:3000/image/" + assignment.answer}>
-                                        <img width={400} height={200}
-                                             src={"http://localhost:3000/image/" + assignment.answer}
-                                             tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_1_horizontal.jpg.pagespeed.ic.V8yJdSbNBp.jpg"
-                                             alt="Image" className="img-fluid"/>
-                                    </a>
+                                <div>
+                                    <h5 className={'text-left'}><strong style={{color: "rgb(25, 118, 210)"}}>
+                                        Solved: </strong></h5>
+                                    <div style={{padding: 5}}>
+
+                                        <a href={"http://localhost:3000/image/" + assignment.answer}>
+                                            <img width={400} height={200}
+                                                 src={"http://localhost:3000/image/" + assignment.answer}
+                                                 tppabs="https://preview.colorlib.com/theme/tutor/images/ximg_1_horizontal.jpg.pagespeed.ic.V8yJdSbNBp.jpg"
+                                                 alt="Image" className="img-fluid"/>
+                                        </a>
+                                    </div>
+
                                 </div>
 
                                 : ''
@@ -369,11 +377,9 @@ export default function SingleAssignment() {
                     {
                         assignment && (!assignment.isAnswered || assignment.isRejected) && user && user.roles[0] == 'ROLE_TEACHER'
                             ?
-                            <div className={'container'}>
-                                <h4 style={{color: "red"}} className={'text-center'}>Do you want to solve this
-                                    exercise?</h4>
-                                <Button><ArrowBackRoundedIcon/>Back</Button>
-                                <span className={'text-right'} style={{paddingLeft: "65%"}}>
+                            <div className={'container'} style={{textAlign: "center"}}>
+
+                                <span className={''}>
                                     {!isSendRequest ?
                                         <>
                                             <span style={{color: "#1976d2", fontWeight: "bold"}}>Level  </span>
@@ -390,28 +396,25 @@ export default function SingleAssignment() {
                                                 <MenuItem value={'DIFFICULT'}>DIFFICULT</MenuItem>
                                                 <MenuItem value={'VERY_DIFFICULT'}>VERY_DIFFICULT</MenuItem>
                                             </Select>
-                                            <Button onClick={handleSendRequest} className={'text'}><ArrowForwardIcon/>Ok</Button>
+                                            <Button onClick={handleSendRequest} className={'text'}><ArrowForwardIcon/>Click To Solve</Button>
 
                                         </> :
-                                        assignment && assignment.responseId != undefined ?
-                                            <p style={{marginLeft: 371}}>
-                                                <span>Send the Answer</span>
+                                        assignment && assignment.responseId != undefined && (!assignment.isRejected)?
+                                            <p >
+                                                <span>Send the Answer </span>
                                                 <input type={"file"} onChange={handleChangeUpload}/>
-                                                <Button onClick={handleSendAnswer} style={{
-                                                    marginRight: 500,
-                                                    marginTop: 24
-                                                }}>Send<SendIcon/></Button>
+                                                <Button onClick={handleSendAnswer}>Send<SendIcon/></Button>
                                             </p> :
                                             <span
-                                                style={{color: "red"}}>You have already sent the request solve!!</span>
+                                                style={{color: "red", fontSize: 19}}>You have already sent the request solve!!</span>
                                     }
 
                                 </span>
                             </div> : ''
                     }
                     {
-                        assignment && (assignment.isAnswered && assignment.responseId == user.id) ?
-                            <h3 className={'text-center'}>You have submitted your answer!!</h3> : ''
+                        assignment && (assignment.isAnswered && assignment.responseId == user.id) && (!assignment.isRejected) ?
+                            <div style={{textAlign: "center"}}><span style={{color: "red", fontSize: 19}}>You have submitted your answer!!</span></div> : ''
                     }
                 </div>
                 <Footer/>

@@ -161,7 +161,8 @@ export default function MyAssignment() {
                                                     handleOpenModel2(assignment)
                                                 }}><EditIcon style={{fill: "#1976d2"}}/></Button>
                                                 : (assignment.isRejected ? <CancelOutlinedIcon
-                                                    style={{fill: "red"}}/> : assignment.rate)) : ''}
+                                                    style={{fill: "red"}}/> :
+                                                    <Rating name="simple-controlled" value={assignment.rate} readOnly/>)) : ''}
                                     </TableCell>
                                     <TableCell align="center">{
                                         assignment.isRejected ? 'Nothing' :
@@ -171,7 +172,6 @@ export default function MyAssignment() {
                                         }}><SearchIcon/></Link>}
                                         {assignment.isAnswered ? '' :
                                             <>
-                                                <Button><ModeEditOutlineOutlinedIcon/></Button>
                                                 <Button onClick={(e) => {
                                                     e.preventDefault();
                                                     handleOpenModal(assignment.id)

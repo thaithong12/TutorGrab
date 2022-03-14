@@ -139,6 +139,10 @@
     float: right;
     border-top-right-radius: 0.2em;
     border-bottom-right-radius: 0.2em;
+    height: 350px;
+    max-height: 400px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 .chatbox__user-list h1 {
     background: rgba(255, 255, 255, 0.05);
@@ -298,4 +302,19 @@
 
 #time-left-tbl table th td{
     padding: 10px;
+}
+
+.background-form {
+    /*background-image: url("");*/
+    background-color: RGB(255,255,255);
+    box-shadow: 2px 5px #888888;
+}
+
+.background-tab {
+    /*background-image: url("http://localhost:3000/static/media/xhero_bg.jpg.pagespeed.ic.WRqU67S8Li.aacbcb2b.jpg");*/
+    /*background-size: cover;*/
+    /*background-repeat: no-repeat;*/
+    /*background-position: right bottom;*/
+    background-color: #f2f1ef;
+
 }

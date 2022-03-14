@@ -22,6 +22,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class RequestService {
@@ -235,6 +236,15 @@ public class RequestService {
         userService.saveUser(requestUser);
         userService.saveUser(responseUser);
 
+        // send notification
+        var notificationEntity = new NotificationEntity();
+        notificationEntity.setReceiverId(responseUser.getId());
+        notificationEntity.setSenderId(requestUser.getId());
+        notificationEntity.setIsRead(false);
+        notificationEntity.setContent("Assignment #" + ass.getAssignmentUrl() + " is accepted!");
+        var tempNotify = notificationService.saveNotify(notificationEntity);
+        simpMessagingTemplate.convertAndSend("/user/" + notificationEntity.getReceiverId() + "/notify", tempNotify);
+
         return null;
     }
 
@@ -246,15 +256,29 @@ public class RequestService {
         }
 
         // Set Request
+        AtomicReference<RequestEntity> temp = null;
         var requestList = requestRepository.findByAssignmentEntity_Id(requestModel.getAssignmentId());
         if (!CollectionUtils.isEmpty(requestList)) {
             requestList.forEach(item -> {
                 if (item.getResponseId() == requestModel.getResponseId()) {
                     item.setIsDeleted(true);
                     requestRepository.save(item);
+                    temp.set(item);
                 }
             });
         }
+
+        if (temp != null) {
+            // send notification
+            var notificationEntity = new NotificationEntity();
+            notificationEntity.setReceiverId(temp.get().getResponseId());
+            notificationEntity.setSenderId(temp.get().getRequestId());
+            notificationEntity.setIsRead(false);
+            notificationEntity.setContent("Request for assignment #" + ass.getAssignmentUrl() + " is rejected!");
+            var tempNotify = notificationService.saveNotify(notificationEntity);
+            simpMessagingTemplate.convertAndSend("/user/" + notificationEntity.getReceiverId() + "/notify", tempNotify);
+        }
+
         return null;
     }
 

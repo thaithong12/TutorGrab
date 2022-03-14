@@ -54,6 +54,8 @@ public class AssignmentResponseModel {
 
     private Boolean isDeleted;
 
+    private Boolean isCompleted;
+
     private String reason;
 
     private Long requestId;
